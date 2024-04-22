@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_planner"
+    app:startDestination="@id/fr_planner">
+    <fragment
+        android:id="@+id/fr_planner"
+        android:name="com.inter.planner.plan.PlannerFragment"
+        android:label="Planner"
+        tools:layout="@layout/fragment_planner">
+
+        <action
+            android:id="@+id/act_fr_journey"
+            app:destination="@+id/fr_journey">
+            <argument
+                android:name="journey_id"
+                android:defaultValue="0"
+                app:argType="string" />
+
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/fr_journey"
+        android:name="com.inter.planner.journey.JourneyFragment"
+        tools:layout="@layout/fragment_journey_map" />
+
+</navigation>

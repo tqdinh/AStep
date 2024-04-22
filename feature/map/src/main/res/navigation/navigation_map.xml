@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_map"
+    app:startDestination="@id/fr_map">
+    <fragment
+        android:id="@+id/fr_map"
+        android:name="com.inter.map.NewPlanFragment"
+        android:label="Map"
+        tools:layout="@layout/fragment_new_plan"></fragment>
+
+</navigation>

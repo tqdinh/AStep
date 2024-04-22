@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ExploreFragment">
+
+    <Button
+        android:id="@+id/btnInsert"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Explore"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnForeGround"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Foreground Location"
+
+        app:layout_constraintTop_toBottomOf="@+id/btnInsert" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/btnForeGround">
+
+        <Button
+            android:id="@+id/btnCopyJourney"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Copy Journey"
+
+            />
+
+        <Button
+            android:id="@+id/btnCopyPlace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Copy Place"
+
+            />
+
+        <Button
+            android:id="@+id/btnCopyImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Copy Image"
+
+            />
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
