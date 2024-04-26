@@ -2,11 +2,14 @@ package com.inter.planner.repositories
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.inter.entity.Mapper
 import com.inter.planner.datasources.LocalJourney
 import com.inter.planner.datasources.RemoteJourney
-import com.inter.planner.entity.ImageEntity
-import com.inter.planner.entity.JourneyEntity
-import com.inter.planner.entity.PlaceEntity
+import com.inter.entity.planner.ImageEntity
+import com.inter.entity.planner.JourneyEntity
+import com.inter.entity.planner.PlaceEntity
+import com.inter.planner.dto.JourneyDTO
+import com.inter.planner.dto.JourneyMapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -18,7 +21,8 @@ import javax.inject.Inject
 interface JourneyRepository {
 
     suspend fun getListJourney()
-    fun getJourney(journeyId: String): Flow<JourneyEntity>
+    fun getListJourneyFlow(): Flow<List<com.inter.entity.planner.JourneyEntity>>
+    fun getJourney(journeyId: String): Flow<com.inter.entity.planner.JourneyEntity>
     suspend fun migrateImages()
 //    fun getPlaceJourney(journeyId: String): Flow<List<PlaceEntity>>
 //    fun getJourney(): Flow<List<JourneyEntity>>
@@ -26,25 +30,38 @@ interface JourneyRepository {
 
 class JourneyRepositoryImpl @Inject constructor(
     val local: LocalJourney,
-    val remote: RemoteJourney
+    val remote: RemoteJourney,
+    val mapper: Mapper<JourneyEntity, JourneyDTO>
 ) :
     JourneyRepository {
-    private val _listJourney: MutableLiveData<List<JourneyEntity>> = MutableLiveData()
-    val listJourney: LiveData<List<JourneyEntity>> = _listJourney
+    private val _listJourney: MutableLiveData<List<com.inter.entity.planner.JourneyEntity>> = MutableLiveData()
+    val listJourney: LiveData<List<com.inter.entity.planner.JourneyEntity>> = _listJourney
+
+    private val _listnumber: MutableLiveData<List<Int>> = MutableLiveData()
+    val listnumber: LiveData<List<Int>> = _listnumber
 
 
     override suspend fun getListJourney() {
-        val myListJourney = local.getListJourney()
+        val myListJourney: List<com.inter.entity.planner.JourneyEntity>? = local.getListJourney()
 
-        withContext(Dispatchers.Main) {
+        withContext(Dispatchers.Main)
+        {
             _listJourney.value = myListJourney
         }
 
+
+        val listDTO=myListJourney?.map{
+            return@map mapper.toData(it)
+        }
+
+        val tmp=listDTO?.size
+
+
+
+
         myListJourney?.forEach {
-            val journeyId = it.id
-            val journeyPlaces = local.getJourneyPlaces(it.id)
-            val places = journeyPlaces.places.map {
-                return@map PlaceEntity(
+            val places: List<com.inter.entity.planner.PlaceEntity> = local.getJourneyPlaces(it.id).places.map {
+                return@map com.inter.entity.planner.PlaceEntity(
                     it.id,
                     it.ref_journey_id,
                     it.timestamp,
@@ -54,33 +71,46 @@ class JourneyRepositoryImpl @Inject constructor(
                     it.lon
                 )
             }
+            it.listPlaces = places
 
-            _listJourney.value?.find {
-                it.id == journeyId
-            }?.apply {
-                withContext(Dispatchers.Main) {
-                    it.listPlaces = places
-                }
-                this.listPlaces?.forEach { place ->
-                    val listOfImages = local.getPlaceImages(place.id).images
+            places?.forEach { place ->
+                val listOfImages = local.getPlaceImages(place.id).images
 
-                    place.listImage = listOfImages.map { lcal ->
-                        return@map ImageEntity(lcal.id, lcal.ref_place_id, lcal.path, "")
-                    }
-                    //place =listOfImages
+                place.listImage = listOfImages.map { lcal ->
+                    return@map com.inter.entity.planner.ImageEntity(
+                        lcal.id,
+                        lcal.ref_place_id,
+                        lcal.path,
+                        ""
+                    )
                 }
+
             }
-
-
         }
+
+
+        withContext(Dispatchers.Main)
+        {
+            _listJourney.value = myListJourney
+        }
+
+
     }
 
-    override fun getJourney(journeyId: String): Flow<JourneyEntity> = flow<JourneyEntity> {
+    override fun getListJourneyFlow(): Flow<List<com.inter.entity.planner.JourneyEntity>> = flow {
+        val myListJourney = local.getListJourney()
+        myListJourney?.apply {
+            emit(this)
+        }
+
+    }
+
+    override fun getJourney(journeyId: String): Flow<com.inter.entity.planner.JourneyEntity> = flow<com.inter.entity.planner.JourneyEntity> {
 
         val journeyPlace = local.getJourneyPlaces(journeyId)
         val journey = journeyPlace.journey
         val places = journeyPlace.places.map {
-            return@map PlaceEntity(
+            return@map com.inter.entity.planner.PlaceEntity(
                 id = it.id,
                 ref_journey_id = it.ref_journey_id,
                 timestamp = it.timestamp,
@@ -89,14 +119,28 @@ class JourneyRepositoryImpl @Inject constructor(
                 lat = it.lat,
                 lon = it.lon,
                 listImage = local.getPlaceImages(it.id).images.map { img ->
-                    return@map ImageEntity(img.id, img.ref_place_id, img.path, "")
+                    return@map com.inter.entity.planner.ImageEntity(
+                        img.id,
+                        img.ref_place_id,
+                        img.path,
+                        ""
+                    )
                 }
             )
         }
 
-        emit(JourneyEntity(journey.id, journey.timestamp, journey.title, journey.desc, places))
+        emit(
+            com.inter.entity.planner.JourneyEntity(
+                journey.id,
+                journey.timestamp,
+                journey.title,
+                journey.desc,
+                places
+            )
+        )
 
     }.flowOn(Dispatchers.IO)
+        .flowOn(Dispatchers.Main)
 
 
     override suspend fun migrateImages() {
@@ -141,4 +185,6 @@ class JourneyRepositoryImpl @Inject constructor(
 //        }
 //    }.flowOn(Dispatchers.IO)
 
+
 }
+

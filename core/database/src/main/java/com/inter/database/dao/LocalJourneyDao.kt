@@ -6,17 +6,17 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.inter.database.entities.JourneyPlaces
-import com.inter.database.entities.LocalJourneyEntity
+import com.inter.database.entities.LocalJourney
 
 
 @Dao
 abstract class LocalJourneyDao {
     @Query("SELECT * FROM journey_table")
-    abstract fun getListJourney(): List<LocalJourneyEntity>
+    abstract fun getListJourney(): List<LocalJourney>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertLocalPlace(place: LocalJourneyEntity)
+    abstract fun insertLocalPlace(place: LocalJourney)
 
     @Query("SELECT * FROM journey_table WHERE journey_id =:journeyId")
     abstract fun getPlacesOfJourney(journeyId: String): JourneyPlaces
@@ -26,5 +26,5 @@ abstract class LocalJourneyDao {
 
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun updatePlace(place: LocalJourneyEntity)
+    abstract fun updatePlace(place: LocalJourney)
 }

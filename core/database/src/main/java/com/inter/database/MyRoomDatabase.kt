@@ -5,13 +5,12 @@ import androidx.room.RoomDatabase
 import com.inter.database.dao.LocalImageDao
 import com.inter.database.dao.LocalJourneyDao
 import com.inter.database.dao.LocalPlaceDao
-import com.inter.database.entities.LocalImageEntity
-import com.inter.database.entities.LocalImageTmp
-import com.inter.database.entities.LocalJourneyEntity
-import com.inter.database.entities.LocalPlaceEntity
+import com.inter.database.entities.LocalImage
+import com.inter.database.entities.LocalJourney
+import com.inter.database.entities.LocalPlace
 
 @Database(
-    entities = [ LocalJourneyEntity::class, LocalPlaceEntity::class, LocalImageEntity::class],
+    entities = [ LocalJourney::class, LocalPlace::class, LocalImage::class],
     version = 3
 )
 abstract class MyRoomDatabase : RoomDatabase() {

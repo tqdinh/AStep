@@ -31,3 +31,4 @@ include(":core:notification")
 include(":data:mylocation")
 include(":core:permission")
 
+include(":core:entity")

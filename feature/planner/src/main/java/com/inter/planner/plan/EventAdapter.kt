@@ -1,39 +1,59 @@
 package com.inter.planner.plan
 
 import android.content.Context
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ImageView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestOptions
 import com.inter.planner.databinding.JourneyCustomeViewBinding
-import com.inter.planner.entity.JourneyEntity
+import com.inter.entity.planner.JourneyEntity
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class EventAdapter(
     private val onItemClickListener: OnItemClickListener,
-) : ListAdapter<JourneyEntity, EventAdapter.EventViewHolder>(object :
-    DiffUtil.ItemCallback<JourneyEntity>() {
-    override fun areItemsTheSame(oldItem: JourneyEntity, newItem: JourneyEntity): Boolean {
-        return oldItem == newItem
+) : ListAdapter<com.inter.entity.planner.JourneyEntity, EventAdapter.EventViewHolder>(object :
+    DiffUtil.ItemCallback<com.inter.entity.planner.JourneyEntity>() {
+    override fun areItemsTheSame(oldItem: com.inter.entity.planner.JourneyEntity, newItem: com.inter.entity.planner.JourneyEntity): Boolean {
+        return oldItem.listPlaces.size == newItem.listPlaces.size
     }
 
-    override fun areContentsTheSame(oldItem: JourneyEntity, newItem: JourneyEntity): Boolean {
-        return oldItem.equals(newItem)
+    override fun areContentsTheSame(oldItem: com.inter.entity.planner.JourneyEntity, newItem: com.inter.entity.planner.JourneyEntity): Boolean {
+        return oldItem.listPlaces.size == newItem.listPlaces.size
 
     }
 }) {
 
     interface OnItemClickListener {
-        fun onItemClick(item: JourneyEntity)
+        fun onItemClick(item: com.inter.entity.planner.JourneyEntity)
     }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
         val binding =
             JourneyCustomeViewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ActiveEventViewHolder(binding, parent.context)
+
+
+        val windowManager = parent.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val widthPixels = displayMetrics.widthPixels
+
+
+        val layoutParams = ViewGroup.LayoutParams(widthPixels, (widthPixels * 0.8).toInt())
+        binding.root.layoutParams = layoutParams
+
+        return ActiveEventViewHolder(binding, parent.context, widthPixels)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -50,35 +70,15 @@ class EventAdapter(
 
     }
 
-    inner class ActiveEventViewHolder(binding: JourneyCustomeViewBinding, context: Context) :
-        EventViewHolder(binding, onItemClickListener, context) {
-        init {
-//            val layoutParams = binding.layoutItemEvent.layoutParams as ViewGroup.MarginLayoutParams
+    inner class ActiveEventViewHolder(
+        binding: JourneyCustomeViewBinding,
+        context: Context,
+        width: Int
+    ) :
+        EventViewHolder(binding, onItemClickListener, context, width) {
 
-//            if (currentList.size == 1) {
-//                layoutParams.leftMargin = dp2px(26F)
-//                layoutParams.rightMargin = dp2px(26F)
-//            }
-//            if (currentList.size > 1) {
-//                layoutParams.width = (getScreenWidth(itemView.context) * 0.85).toInt()
-//                layoutParams.rightMargin = dp2px(10F)
-//            }
-//            binding.btnContinue.visibility = View.VISIBLE
-            //      binding.descEvent.visibility = View.GONE
-        }
-
-        override fun bind(item: JourneyEntity, position: Int) {
+        override fun bind(item: com.inter.entity.planner.JourneyEntity, position: Int) {
             super.bind(item, position)
-            //  val layoutParams = binding.layoutItemEvent.layoutParams as ViewGroup.MarginLayoutParams
-//            if (position == 0) {
-//                layoutParams.leftMargin = dp2px(26F)
-//            } else if (position == currentList.size - 1) {
-//                layoutParams.leftMargin = 0
-//                layoutParams.rightMargin = dp2px(26F)
-//            }
-//
-//            checkStatusDownload(item)
-//            downloadImage(item, mapPhotoDetail) { getImageUrlFromId(it, position) }
         }
 
 
@@ -88,49 +88,72 @@ class EventAdapter(
 
         val binding: JourneyCustomeViewBinding,
         private val onItemClickListener: OnItemClickListener,
-        val context: Context
+        val context: Context,
+        val width: Int
     ) : RecyclerView.ViewHolder(binding.root) {
-        init {
-//            binding.imvEvent.clipToOutline = true
-//            bindPhoto("", binding.imvEvent)
-        }
 
-        init {
-
-        }
-
-        open fun bind(item: JourneyEntity, position: Int) {
+        open fun bind(item: com.inter.entity.planner.JourneyEntity, position: Int) {
             val totalImage = item.listPlaces.flatMap {
                 it.listImage
             }.count()
+
+            binding.tvStartDate.text =
+                SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(Date(item.timestamp))
             binding.tvJourneyName.text = item.title
-            binding.tvPlaceNumber.text = item.listPlaces.size.toString()
-            binding.tvPlaceTotalImg.text = totalImage.toString()
-            var tmp=0
-            for (place in item.listPlaces) {
-                if(tmp>=5)
-                    break
-
-                val imgPath = place.listImage[0].path
-                val imageView = ImageView(context)
-
-                bindPhoto(
-//                    "https://media.geeksforgeeks.org/wp-content/cdn-uploads/gfg_200x200-min.png",
-                    imgPath,
-                    imageView
-                )
-                binding.llPlaces.addView(imageView)
-                tmp+=1
+            item.listPlaces?.let {
+                binding.tvPlaceNumber.text = item.listPlaces.size.toString()
             }
 
+            var tmp = 0
+            for (place in item.listPlaces) {
+                if (tmp >= 7)
+                    break
 
-//            binding.txtTitleEvent.text = item.title
-//            binding.tvDateTime.text = DateTimeUtils.getDateString(item.timestamp)
-//            binding.descEvent.text = Util.parseHtmlToStyledTextOrEmpty(item.shortDesc)
-//            binding.btnContinue.setOnClickListener { onItemClickListener.onItemClick(item) }
-//            binding.btnGetStarted.setOnClickListener { onItemClickListener.onItemClick(item) }
+                if (place.listImage.isNotEmpty()) {
+
+                    val firstPlace = item.listPlaces.first()
+                    val lastPlace = item.listPlaces.last()
+                    val dayInterVal =
+                        Math.abs(lastPlace.timestamp - firstPlace.timestamp) / (1000 * 60 * 60)
+                    binding.tvDays.text = dayInterVal.toString() + "hours"
+
+                    place.listImage.first().let {
+                        val imgPath = it.path
+                        val imageView = ImageView(context)
+                        val layoutParams = ConstraintLayout.LayoutParams(
+                            ConstraintLayout.LayoutParams.MATCH_PARENT,  // Width
+                            0  // Height
+                        )
+                        layoutParams.width = width // Set height to 200 pixels
+                        layoutParams.height = width
+                        imageView.layoutParams = layoutParams
+
+
+
+                        bindPhoto(
+//                    "https://media.geeksforgeeks.org/wp-content/cdn-uploads/gfg_200x200-min.png",
+                            imgPath,
+                            imageView
+                        )
+
+                        // bindPhoto(imgPath, binding.ivTmp)
+                        binding.llPlaces.addView(imageView)
+                    }
+                }
+
+
+                // Apply the LayoutParams to the ImageView
+
+                tmp += 1
+            }
 
             binding.root.setOnClickListener {
+                onItemClickListener.onItemClick(item)
+            }
+            binding.ivTrackJourney.setOnClickListener {
+                onItemClickListener.onItemClick(item)
+            }
+            binding.llPlaces.setOnClickListener{
                 onItemClickListener.onItemClick(item)
             }
         }
@@ -141,6 +164,8 @@ class EventAdapter(
                 .load(url)
 //                .placeholder(circularProgressDrawable)
 //                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .apply(RequestOptions().centerCrop())
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .into(imageView)
         }
     }

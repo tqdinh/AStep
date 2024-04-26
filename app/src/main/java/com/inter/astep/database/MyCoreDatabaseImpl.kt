@@ -3,15 +3,15 @@ package com.inter.astep.database
 import com.inter.database.CoreDatabase
 import com.inter.database.MyRoomDatabase
 import com.inter.database.entities.JourneyPlaces
-import com.inter.database.entities.LocalJourneyEntity
+import com.inter.database.entities.LocalJourney
 import com.inter.database.entities.PlaceImages
 
 class MyCoreDatabaseImpl(val myRoomDatabase: MyRoomDatabase) : CoreDatabase {
-    override fun getListJourney(): List<LocalJourneyEntity> {
+    override fun getListJourney(): List<LocalJourney> {
         return try {
             myRoomDatabase.getLocalJourneyDao().getListJourney()
         } catch (e: Exception) {
-            emptyList<LocalJourneyEntity>()
+            emptyList<LocalJourney>()
         }
 
     }
