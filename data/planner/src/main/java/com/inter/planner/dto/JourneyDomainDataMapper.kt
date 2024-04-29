@@ -1,9 +1,9 @@
 package com.inter.planner.dto
 
-import com.inter.entity.Mapper
+import com.inter.entity.DomainDataMapper
 import com.inter.entity.planner.JourneyEntity
 
-class JourneyMapper : Mapper<JourneyEntity, JourneyDTO> {
+class JourneyDomainDataMapper : DomainDataMapper<JourneyEntity, JourneyDTO> {
     override fun toDomain(data: JourneyDTO): JourneyEntity {
         return JourneyEntity(data.id, data.timestamp, data.title, data.desc, data.listPlaces)
     }

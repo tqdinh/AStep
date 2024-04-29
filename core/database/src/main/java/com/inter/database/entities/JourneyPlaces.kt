@@ -9,5 +9,5 @@ data class JourneyPlaces(
   parentColumn ="journey_id",
   entityColumn = "ref_journey_id"
  )
- val places:List<LocalPlace>
+ val places:MutableList<LocalPlace>
 )

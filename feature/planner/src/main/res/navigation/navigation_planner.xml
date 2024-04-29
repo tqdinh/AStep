@@ -12,7 +12,7 @@
 
         <action
             android:id="@+id/act_fr_journey"
-            app:destination="@+id/fr_journey">
+            app:destination="@+id/testing_activity">
             <argument
                 android:name="journey_id"
                 android:defaultValue="0"
@@ -24,5 +24,8 @@
         android:id="@+id/fr_journey"
         android:name="com.inter.planner.journey.JourneyFragment"
         tools:layout="@layout/fragment_journey_map" />
+    <activity
+        android:id="@+id/testing_activity"
+        android:name="com.inter.planner.journey.JourneyActivity" />
 
 </navigation>

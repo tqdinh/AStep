@@ -10,7 +10,7 @@ import com.inter.database.entities.LocalJourney
 import com.inter.database.entities.LocalPlace
 
 @Database(
-    entities = [ LocalJourney::class, LocalPlace::class, LocalImage::class],
+    entities = [LocalJourney::class, LocalPlace::class, LocalImage::class],
     version = 3
 )
 abstract class MyRoomDatabase : RoomDatabase() {

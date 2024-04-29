@@ -4,6 +4,7 @@ package com.inter.main.di
 import android.app.Application
 import androidx.room.Room
 import androidx.room.migration.Migration
+
 import com.inter.astep.database.MyCoreDatabaseImpl
 import com.inter.database.CoreDatabase
 import com.inter.database.MyRoomDatabase
@@ -26,17 +27,16 @@ class AppDiModule {
             application.applicationContext,
             MyRoomDatabase::class.java,
             "place_info.db"
-        ).addMigrations(Migration(2,3)
-        {
-
-        })
+        ).createFromAsset("place_info.db")
+//            .addMigrations(Migration(3, 4, {
+//
+//            }))
             .build()
     }
 
     @Provides
     @Singleton
-    fun provideCoreDatabaseImpl(myRoomDatabase: MyRoomDatabase):CoreDatabase
-    {
+    fun provideCoreDatabaseImpl(myRoomDatabase: MyRoomDatabase): CoreDatabase {
         return MyCoreDatabaseImpl(myRoomDatabase)
 
     }

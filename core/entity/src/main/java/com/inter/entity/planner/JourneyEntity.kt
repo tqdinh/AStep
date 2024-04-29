@@ -6,5 +6,5 @@ data class JourneyEntity(
     val timestamp: Long = System.currentTimeMillis(),
     val title: String = "",
     val desc: String = "",
-    var listPlaces: List<PlaceEntity> = emptyList()
+    var listPlaces: MutableList<PlaceEntity> = mutableListOf()
 )

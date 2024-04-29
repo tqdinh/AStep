@@ -34,7 +34,7 @@ object NetworkUtils {
         addInterceptor(logginInterceptor)
         retryOnConnectionFailure(false)
     }.build()
-    val BASE_URL = ""
+    val BASE_URL = "https://onestep-4004e-default-rtdb.asia-southeast1.firebasedatabase.app"
     val GSON = GsonBuilder().setLenient().create()
 
     fun getRetrofit(): Retrofit {

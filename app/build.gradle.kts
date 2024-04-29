@@ -64,6 +64,7 @@ dependencies {
     implementation(project(":feature:profile"))
 
     implementation(project(":core:database"))
+    implementation(project(":core:network"))
 
     val hilt_version ="2.50"
     implementation("com.google.dagger:hilt-android:$hilt_version")

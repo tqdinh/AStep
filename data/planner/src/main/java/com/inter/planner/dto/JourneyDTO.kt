@@ -4,8 +4,8 @@ import com.inter.entity.planner.PlaceEntity
 
 data class JourneyDTO(
     val id: String = "",
-    val timestamp: Long = System.currentTimeMillis(),
+    val timestamp: Long,
     val title: String = "",
     val desc: String = "",
-    var listPlaces: List<PlaceEntity> = emptyList()
+    var listPlaces: MutableList<PlaceEntity> = mutableListOf()
 )

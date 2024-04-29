@@ -8,6 +8,8 @@ import java.util.UUID
 data class LocalJourney(
     @ColumnInfo("journey_id") val id: String = UUID.randomUUID().toString(),
     val timestamp: Long = System.currentTimeMillis(),
+//    val createTime:Long,
+//    val updateTime:Long,
     val title: String = "",
     val desc: String = "",
 )

@@ -9,6 +9,8 @@ data class LocalPlace(
     @ColumnInfo("place_id") val id: String = UUID.randomUUID().toString(),
     @ColumnInfo("ref_journey_id") val ref_journey_id: String,
     val timestamp: Long = System.currentTimeMillis(),
+//    val createTime:Long,
+//    val updateTime:Long,
     val title: String = "",
     val desc: String = "",
     var lat: Double = 0.0,

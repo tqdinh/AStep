@@ -4,6 +4,8 @@ plugins {
 
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+
+    id("kotlin-parcelize")
 }
 
 android {
@@ -51,4 +53,10 @@ dependencies {
     val hilt_version ="2.50"
     implementation("com.google.dagger:hilt-android:$hilt_version")
     kapt("com.google.dagger:hilt-android-compiler:$hilt_version")
+
+    val retrofit2_version ="2.11.0"
+    implementation("com.squareup.retrofit2:retrofit:$retrofit2_version")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofit2_version")
+
+
 }

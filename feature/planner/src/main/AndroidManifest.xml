@@ -3,13 +3,12 @@
 
     <application>
         <activity
-            android:name=".TmpActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MyJourneyActivity"
+            android:name=".journey.TmpActivity"
             android:exported="false"
-            android:label="@string/title_activity_my_journey"
             android:theme="@style/Theme.AStep" />
+        <activity
+            android:name=".journey.JourneyActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
