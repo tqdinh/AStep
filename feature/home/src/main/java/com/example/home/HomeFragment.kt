@@ -35,13 +35,10 @@ class HomeFragment : Fragment(), EventAdapter.OnItemClickListener {
     ): View? {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
 
-
         return binding.root
     }
 
     fun setupView() {
-
-
         try {
 
             viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
@@ -53,7 +50,6 @@ class HomeFragment : Fragment(), EventAdapter.OnItemClickListener {
                                 listJourney?.forEach {
                                     Log.d("LIST_PLACES", "" + it)
                                 }
-
 
                             }
 

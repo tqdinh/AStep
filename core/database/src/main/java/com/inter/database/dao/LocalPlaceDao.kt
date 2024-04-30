@@ -21,7 +21,11 @@ abstract class LocalPlaceDao {
     abstract fun updatePlace(localImage: LocalPlace)
 
     @Query("SELECT * FROM place_table WHERE place_id=:placeId ")
-    abstract fun getImageOfPlace(placeId:String): PlaceImages
+    abstract fun getImageOfPlace(placeId: String): PlaceImages
+
+
+    @Query("DELETE FROM place_table WHERE place_id=:placeId")
+    abstract fun deletePlace(placeId: String)
 //
 //    @Query("SELECT * FROM place_table WHERE place_id=:placeId")
 //    abstract fun getImagesOnPlace(placeId: String): List<LocalPlaceEntity>

@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inter.entity.planner.ApiResult
-import com.inter.entity.planner.JourneyEntity
+import com.inter.entity.planner.PlaceEntity
 import com.inter.planner.repositories.JourneyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -61,6 +61,27 @@ class JourneyViewModel @Inject constructor(val repository: JourneyRepository) : 
                     }
 
                 })
+            }
+        }
+
+    }
+
+    fun deletePlaceAndItsImage(placeEntity: PlaceEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+
+            placeEntity?.listImage?.forEach {
+                repository.deleteImage(it.id)
+            }
+            repository.deletePlace(placeEntity.id)
+
+            _journey.value?.listPlaces?.find {
+                it.id == placeEntity.id
+            }?.also {
+                _journey.value?.listPlaces?.remove(it)
+                withContext(Dispatchers.Main)
+                {
+                    _journey.value = _journey.value
+                }
             }
 
 

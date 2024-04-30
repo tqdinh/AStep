@@ -13,7 +13,12 @@
 
         <action
             android:id="@+id/act_journey_camera"
-            app:destination="@+id/fr_camera"></action>
+            app:destination="@+id/fr_camera">
+            <argument
+                android:name="journey_id"
+                android:defaultValue="0"
+                app:argType="string" />
+        </action>
     </fragment>
 
     <fragment

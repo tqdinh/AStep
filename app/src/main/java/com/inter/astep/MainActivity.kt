@@ -38,13 +38,6 @@ class MainActivity : AppCompatActivity() {
 
 
 
-
-
-
-
-
-
-
     }
 
     val requestPermissionLauncher =

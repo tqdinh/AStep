@@ -22,6 +22,8 @@ abstract class LocalImageDao {
     @Query("UPDATE image_table SET path=:new_path WHERE img_id=:imageId")
     abstract fun updatePathOfApp(new_path:String,imageId:String)
 
+    @Query("DELETE FROM image_table WHERE img_id=:imgId")
+    abstract fun deleteImage(imgId: String)
 
 //    @Query("SELECT * FROM image_table WHERE place_id=:placeId")
 //    abstract fun getImagesOnPlace(placeId: String): List<LocalImageEntity>

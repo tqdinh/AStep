@@ -1,25 +1,29 @@
 package com.inter.planner.repositories
 
+import android.os.Parcel
+import android.os.Parcelable
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.inter.entity.DomainDataMapper
-import com.inter.entity.DomainRequestMapper
-import com.inter.planner.datasources.LocalJourney
+import com.inter.planner.datasources.JourneyLocalDatasource
 import com.inter.planner.datasources.RemoteJourney
 import com.inter.entity.planner.ImageEntity
 import com.inter.entity.planner.JourneyEntity
 import com.inter.entity.planner.PlaceEntity
 import com.inter.entity.planner.ApiResult
-import com.inter.planner.apis.request.JourneyRequest
+import com.inter.planner.datasources.ImageLocalDataSource
+import com.inter.planner.datasources.PlaceLocalDatasource
 import com.inter.planner.datasources.RemoteImage
 import com.inter.planner.datasources.RemotePlace
-import com.inter.planner.dto.JourneyDTO
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -39,21 +43,40 @@ interface JourneyRepository {
     fun backupPlaceToServer(placeEntity: PlaceEntity): Flow<ApiResult<PlaceEntity>>
 
 
+    suspend fun createPlace(placeEntity: PlaceEntity): PlaceEntity
+    suspend fun deletePlace(placeId: String): String?
+    suspend fun deleteImage(imageId: String): String
+
+    suspend fun createImage(imageEntity: ImageEntity): ImageEntity
+
 }
 
 class JourneyRepositoryImpl @Inject constructor(
-    val local: LocalJourney,
+    val local: JourneyLocalDatasource,
+    val localPlaceDataSource: PlaceLocalDatasource,
+    val localImageDatasource: ImageLocalDataSource,
     val remote: RemoteJourney,
     val remotePlace: RemotePlace,
     val remoteImage: RemoteImage,
 ) :
-    JourneyRepository {
+    JourneyRepository, Parcelable {
     private val _listJourney: MutableLiveData<List<com.inter.entity.planner.JourneyEntity>> =
         MutableLiveData()
     val listJourney: LiveData<List<com.inter.entity.planner.JourneyEntity>> = _listJourney
 
     private val _listnumber: MutableLiveData<List<Int>> = MutableLiveData()
     val listnumber: LiveData<List<Int>> = _listnumber
+
+    constructor(parcel: Parcel) : this(
+        TODO("local"),
+        TODO("localPlaceDataSource"),
+        TODO("localImageDatasource"),
+        TODO("remote"),
+        TODO("remotePlace"),
+        TODO("remoteImage")
+    ) {
+    }
+
     override suspend fun getListJourney() {
         val myListJourney: List<JourneyEntity>? = local.getListJourney()
         withContext(Dispatchers.Main)
@@ -183,12 +206,14 @@ class JourneyRepositoryImpl @Inject constructor(
                                                     if (null != imgId) {
                                                         place.listImage.add(img)
 
-                                                        emit(ApiResult.Success<JourneyEntity>(
-                                                            tmpJourney))
+                                                        emit(
+                                                            ApiResult.Success<JourneyEntity>(
+                                                                tmpJourney
+                                                            )
+                                                        )
                                                     }
                                                 }
-                                            }
-                                            else{
+                                            } else {
                                                 retImage.toString()
                                             }
                                         }
@@ -222,6 +247,30 @@ class JourneyRepositoryImpl @Inject constructor(
 
         }
 
+    override suspend fun createPlace(placeEntity: PlaceEntity): PlaceEntity {
+        return localPlaceDataSource.createPlace(placeEntity)
+    }
+
+    override suspend fun deletePlace(placeId: String): String {
+        return localPlaceDataSource.deletePlace(placeId)
+    }
+
+    override suspend fun deleteImage(imageId: String): String {
+        return localImageDatasource.deletImage(imageId)
+    }
+
+    override suspend fun createImage(imageEntity: ImageEntity): ImageEntity {
+        return localImageDatasource.createImage(imageEntity)
+    }
+
+
+//    override fun createImage(image: RemoteImage) {
+//
+//            val threadName = Thread.currentThread().name
+//            Log.d("THREADING_COROUTIN", threadName)
+//
+//    }
+
 
 //    override fun getPlaceJourney(journeyId: String): Flow<List<PlaceEntity>> =
 //        flow<List<PlaceEntity>> {
@@ -249,7 +298,7 @@ class JourneyRepositoryImpl @Inject constructor(
 //        _listJourney.value = myListJourney
 //    }
 
-//    override fun getJourney(): Flow<List<JourneyEntity>> = flow<List<JourneyEntity>> {
+    //    override fun getJourney(): Flow<List<JourneyEntity>> = flow<List<JourneyEntity>> {
 //        val myListJourney = local.getListJourney()
 //        withContext(Dispatchers.Main)
 //        {
@@ -259,6 +308,23 @@ class JourneyRepositoryImpl @Inject constructor(
 //            emit(myListJourney)
 //        }
 //    }.flowOn(Dispatchers.IO)
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<JourneyRepositoryImpl> {
+        override fun createFromParcel(parcel: Parcel): JourneyRepositoryImpl {
+            return JourneyRepositoryImpl(parcel)
+        }
+
+        override fun newArray(size: Int): Array<JourneyRepositoryImpl?> {
+            return arrayOfNulls(size)
+        }
+    }
 
 
 }

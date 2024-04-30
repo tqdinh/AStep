@@ -1,6 +1,9 @@
 package com.inter.planner.di
 
+import com.inter.database.entities.LocalImage
+import com.inter.database.entities.LocalPlace
 import com.inter.entity.DomainDataMapper
+import com.inter.entity.DomainDbMapper
 import com.inter.entity.DomainRequestMapper
 import com.inter.entity.planner.ImageEntity
 import com.inter.entity.planner.JourneyEntity
@@ -12,14 +15,18 @@ import com.inter.network.apis.PlaceApi
 import com.inter.planner.apis.request.ImageRequest
 import com.inter.planner.apis.request.JourneyRequest
 import com.inter.planner.apis.request.PlaceRequest
-import com.inter.planner.datasources.LocalJourney
+import com.inter.planner.datasources.ImageLocalDataSource
+import com.inter.planner.datasources.JourneyLocalDatasource
+import com.inter.planner.datasources.PlaceLocalDatasource
 import com.inter.planner.datasources.RemoteImage
 import com.inter.planner.datasources.RemoteJourney
 import com.inter.planner.datasources.RemotePlace
+import com.inter.planner.dto.ImageDomainDBMapper
 import com.inter.planner.dto.ImageDomainRequestMapper
 import com.inter.planner.dto.JourneyDTO
 import com.inter.planner.dto.JourneyDomainDataMapper
 import com.inter.planner.dto.JourneyDomainRequestMapper
+import com.inter.planner.dto.PlaceDomainDBMapper
 import com.inter.planner.dto.PlaceDomainRequestMapper
 import com.inter.planner.repositories.JourneyRepository
 import com.inter.planner.repositories.JourneyRepositoryImpl
@@ -36,12 +43,14 @@ object PlannerModule {
     @Provides
     @Singleton
     fun providePlaceRepo(
-        local: LocalJourney,
+        local: JourneyLocalDatasource,
+        localPlaceDatasource: PlaceLocalDatasource,
+        localImageDataSource:ImageLocalDataSource,
         remote: RemoteJourney,
         remotePlace: RemotePlace,
         remoteImage: RemoteImage
     ): JourneyRepository {
-        return JourneyRepositoryImpl(local, remote, remotePlace,remoteImage)
+        return JourneyRepositoryImpl(local, localPlaceDatasource,localImageDataSource, remote, remotePlace, remoteImage)
     }
 
     @Provides
@@ -49,6 +58,17 @@ object PlannerModule {
     fun provideJourneyMapper(): DomainDataMapper<JourneyEntity, JourneyDTO> {
         return JourneyDomainDataMapper()
     }
+
+
+    @Provides
+    @Singleton
+    fun providePlaceDomainDbMapper(): DomainDbMapper<PlaceEntity, LocalPlace> =
+        PlaceDomainDBMapper()
+
+    @Provides
+    @Singleton
+    fun provideImageDomainDbMapper(): DomainDbMapper<ImageEntity, LocalImage> =
+        ImageDomainDBMapper()
 
     @Provides
     @Singleton

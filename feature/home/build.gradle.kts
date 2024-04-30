@@ -100,4 +100,9 @@ dependencies {
     implementation("androidx.camera:camera-video:${camerax_version}")
     implementation("androidx.camera:camera-view:${camerax_version}")
     implementation("androidx.camera:camera-extensions:${camerax_version}")
+
+
+    // https://mvnrepository.com/artifact/cn.pedant.sweetalert/library
+//    val sweetalert_version = "1.3"
+//    implementation("cn.pedant.sweetalert:library:${sweetalert_version}")
 }

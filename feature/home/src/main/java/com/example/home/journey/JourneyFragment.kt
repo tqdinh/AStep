@@ -1,6 +1,8 @@
 package com.example.home.journey
 
+
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -12,7 +14,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.AbsListView
 import android.widget.GridView
-
+import androidx.compose.material3.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -24,17 +26,12 @@ import androidx.navigation.fragment.findNavController
 import com.example.home.R
 import com.example.home.adapter.PlaceAdapter
 import com.example.home.databinding.FragmentJourneyBinding
-
-
 import com.example.home.utils.CreateDrawableMarker
 import com.example.home.utils.CustomBottomSheetDialog
-
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.inter.entity.planner.JourneyEntity
 import com.inter.entity.planner.PlaceEntity
 import com.inter.mylocation.LocationRepository
-
-
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import org.osmdroid.api.IMapController
@@ -48,7 +45,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-
+import android.app.AlertDialog;
 
 @AndroidEntryPoint
 class JourneyFragment : Fragment() {
@@ -80,14 +77,46 @@ class JourneyFragment : Fragment() {
         arguments?.apply {
             (getString("journey_id"))?.apply {
                 journeyId = this
-                viewModel.getJourney(this)
             }
         }
 
         gridPlace = binding.root.findViewById(R.id.gvPlaceImg)
         bottomSheet = binding.root.findViewById(R.id.bottomSheet)
 
-        adapter = PlaceAdapter()
+        adapter = PlaceAdapter(object : PlaceAdapter.OnItemSelectOptionListener {
+            override fun onDeletePlace(position: Int) {
+
+                val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+                builder.setTitle("You are about to delete this place")
+                    .setMessage("It can not be recovered.")
+                    .setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
+                        val place = adapter.listPlaces.get(position)
+                        viewModel.deletePlaceAndItsImage(place)
+                        dialog.dismiss() // Close the dialog
+                    })
+                    .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which ->
+                        // Handle Cancel button click
+                        dialog.dismiss() // Close the dialog
+                    })
+
+                val alertDialog: AlertDialog = builder.create()
+                alertDialog.show()
+
+            }
+
+            override fun onNavigatePlace(position: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onSharePlace(position: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onSelectPlace(position: Int) {
+                TODO("Not yet implemented")
+            }
+
+        })
         gridPlace.adapter = adapter
 
         gridPlace.setOnScrollListener(object : AbsListView.OnScrollListener {
@@ -274,7 +303,8 @@ class JourneyFragment : Fragment() {
             CustomBottomSheetDialog(object : CustomBottomSheetDialog.OnSelectCameraGalary {
                 override fun onSelectCamera() {
 
-                    findNavController().navigate(R.id.act_journey_camera)
+                    val action = JourneyFragmentDirections.actJourneyCamera(journeyId)
+                    findNavController().navigate(action)
                 }
 
                 override fun onSelectGalary() {
@@ -302,9 +332,23 @@ class JourneyFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         viewLifecycleOwner.lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED)
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED)
             {
+                journeyId?.apply {
+                    viewModel.getJourney(journeyId)
+                }
+
+
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED)
+            {
+
                 viewModel.journey.observe(
                     requireActivity(),
                     object : Observer<JourneyEntity> {

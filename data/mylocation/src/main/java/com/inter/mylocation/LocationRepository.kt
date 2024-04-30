@@ -20,6 +20,8 @@ object LocationRepository {
     private val _myLocation: MutableLiveData<Location> = MutableLiveData()
     val myLocation: LiveData<Location> = _myLocation
 
+
+
     private val LOCATION_UPDATE_INTERVAL = 10L
     private val callback = object : LocationCallback() {
         override fun onLocationResult(p0: LocationResult) {

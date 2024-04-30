@@ -2,7 +2,9 @@ package com.example.home.camera
 
 import android.Manifest
 import android.content.ContentValues
+import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import androidx.fragment.app.viewModels
 import android.os.Bundle
@@ -25,16 +27,22 @@ import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.example.home.R
 import com.example.home.databinding.FragmentCameraBinding
+import com.inter.mylocation.LocationRepository
+import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+@AndroidEntryPoint
 class CameraFragment : Fragment(), LifecycleOwner {
+
 
     companion object {
         private const val TAG = "CameraXApp"
@@ -50,6 +58,12 @@ class CameraFragment : Fragment(), LifecycleOwner {
             }.toTypedArray()
     }
 
+    val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            findNavController().popBackStack()
+        }
+    }
+
 
     private val imageCapture: ImageCapture by lazy {
         ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY).build()
@@ -58,6 +72,9 @@ class CameraFragment : Fragment(), LifecycleOwner {
     private var videoCapture: VideoCapture<Recorder>? = null
     private var recording: Recording? = null
     private lateinit var cameraExecutor: ExecutorService
+    var journeyId: String = ""
+
+    val PHOTO_EXTENSION = ".jpg"
 
     val cameraSelector = CameraSelector.LENS_FACING_BACK
     private val activityResultLauncher =
@@ -83,6 +100,7 @@ class CameraFragment : Fragment(), LifecycleOwner {
         }
 
     lateinit var viewBinding: FragmentCameraBinding
+
     private val viewModel: CameraViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,15 +116,22 @@ class CameraFragment : Fragment(), LifecycleOwner {
     ): View {
         viewBinding = FragmentCameraBinding.inflate(inflater, container, false)
 //        return inflater.inflate(R.layout.fragment_camera, container, false)
-        val onBackPressedCallback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                findNavController().popBackStack()
+
+
+        arguments?.apply {
+            (getString("journey_id"))?.apply {
+                journeyId = this
+
             }
         }
+
+
         requireActivity().onBackPressedDispatcher.addCallback(
             requireActivity(),
             onBackPressedCallback
         );
+
+
 
 
         if (allPermissionsGranted()) {
@@ -157,10 +182,19 @@ class CameraFragment : Fragment(), LifecycleOwner {
         }
 
         // Set up the listeners for take photo and video capture buttons
-        viewBinding.btnTakePic.setOnClickListener { takePhoto() }
+        viewBinding.btnTakePic.setOnClickListener {
+            takePhoto()
+        }
 //        viewBinding.videoCaptureButton.setOnClickListener { captureVideo() }
-
         cameraExecutor = Executors.newSingleThreadExecutor()
+
+        LocationRepository.myLocation.observe(viewLifecycleOwner, object : Observer<Location> {
+            override fun onChanged(value: Location) {
+
+//                binding.btnForeGround.text = "" + value.latitude + ":" + value.longitude
+            }
+
+        })
     }
 
     private fun takePhoto() {
@@ -179,13 +213,16 @@ class CameraFragment : Fragment(), LifecycleOwner {
         }
 
         // Create output options object which contains file + metadata
+
+
+        val photoFile =
+            File(getOutputDirectory(), System.currentTimeMillis().toString() + PHOTO_EXTENSION)
+
+
         val outputOptions = ImageCapture.OutputFileOptions
-            .Builder(
-                requireActivity().contentResolver,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                contentValues
-            )
+            .Builder(photoFile)
             .build()
+
 
         // Set up image capture listener, which is triggered after photo has
         // been taken
@@ -196,6 +233,8 @@ class CameraFragment : Fragment(), LifecycleOwner {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     val msg = "Photo capture succeeded: ${outputFileResults.savedUri}"
 
+                    viewModel.createPlace(journeyId,outputFileResults.savedUri.toString())
+
                     Log.d(TAG, msg)
                 }
 
@@ -204,22 +243,6 @@ class CameraFragment : Fragment(), LifecycleOwner {
                 }
 
             })
-//        imageCapture.takePicture(
-//            outputOptions,
-//            ContextCompat.getMainExecutor(requireContext()),
-//            object : ImageCapture.OnImageSavedCallback {
-//                override fun onError(exc: ImageCaptureException) {
-//                    Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
-//                }
-//
-//                override fun
-//                        onImageSaved(output: ImageCapture.OutputFileResults) {
-//                    val msg = "Photo capture succeeded: ${output.savedUri}"
-//                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
-//                    Log.d(TAG, msg)
-//                }
-//            }
-//        )
     }
 
     private fun captureVideo() {}
@@ -242,4 +265,21 @@ class CameraFragment : Fragment(), LifecycleOwner {
     }
 
 
+    fun getOutputDirectory(): File {
+        val appContext = requireContext().applicationContext
+        // If the app name contains (e.g. dev app) a space, it is a not converted to %20 automatically.
+        val appNameLowerUnderscore = "imagesx"
+
+        val mediaDir = requireContext().externalMediaDirs.firstOrNull()?.let {
+            File(it, appNameLowerUnderscore).apply { mkdirs() }
+        }
+        return if (mediaDir != null && mediaDir.exists())
+            mediaDir else appContext.filesDir
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        cameraExecutor.shutdown()
+        onBackPressedCallback.remove()
+    }
 }

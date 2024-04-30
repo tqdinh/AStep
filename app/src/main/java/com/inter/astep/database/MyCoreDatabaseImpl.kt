@@ -3,7 +3,9 @@ package com.inter.astep.database
 import com.inter.database.CoreDatabase
 import com.inter.database.MyRoomDatabase
 import com.inter.database.entities.JourneyPlaces
+import com.inter.database.entities.LocalImage
 import com.inter.database.entities.LocalJourney
+import com.inter.database.entities.LocalPlace
 import com.inter.database.entities.PlaceImages
 
 class MyCoreDatabaseImpl(val myRoomDatabase: MyRoomDatabase) : CoreDatabase {
@@ -37,6 +39,24 @@ class MyCoreDatabaseImpl(val myRoomDatabase: MyRoomDatabase) : CoreDatabase {
 
             myRoomDatabase.getLocalImageDao().updatePathOfApp(new_path, img.id)
         }
+    }
+
+    override fun createPlace(placeEntity: LocalPlace) {
+        val kkk = myRoomDatabase.getLocalPlaceDao().insertPlace(placeEntity)
+        return kkk
+    }
+
+    override fun deletePlace(placeId: String) {
+        myRoomDatabase.getLocalPlaceDao().deletePlace(placeId)
+    }
+
+    override fun createImage(image: LocalImage) {
+        val kkk = myRoomDatabase.getLocalImageDao().insertImage(image)
+        return kkk
+    }
+
+    override fun deleteImage(imageId: String) {
+        myRoomDatabase.getLocalImageDao().deleteImage(imageId)
     }
 
 //    override fun getJourneyPlaces(): JourneyPlaces {
