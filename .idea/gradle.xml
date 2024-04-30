@@ -27,9 +27,10 @@
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/explore" />
             <option value="$PROJECT_DIR$/feature/gear" />
+            <option value="$PROJECT_DIR$/feature/home" />
             <option value="$PROJECT_DIR$/feature/map" />
-            <option value="$PROJECT_DIR$/feature/planner" />
             <option value="$PROJECT_DIR$/feature/profile" />
+            <option value="$PROJECT_DIR$/feature/testing" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

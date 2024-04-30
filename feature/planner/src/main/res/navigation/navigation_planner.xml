@@ -20,12 +20,12 @@
 
         </action>
     </fragment>
-    <fragment
-        android:id="@+id/fr_journey"
-        android:name="com.inter.planner.journey.JourneyFragment"
-        tools:layout="@layout/fragment_journey_map" />
+
     <activity
         android:id="@+id/testing_activity"
-        android:name="com.inter.planner.journey.JourneyActivity" />
+        android:name="com.inter.planner.journey.JourneyActivity"
+        tools:layout="@layout/activity_journey" />
+
+
 
 </navigation>

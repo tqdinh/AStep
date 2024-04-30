@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.AbsListView
 import android.widget.GridView
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -29,6 +30,7 @@ import com.inter.entity.planner.PlaceEntity
 import com.inter.mylocation.LocationRepository
 import com.inter.planner.adapter.PlaceAdapter
 import com.inter.planner.databinding.FragmentJourneyBinding
+import com.inter.planner.utils.CreateDrawableMarker
 import com.inter.planner.utils.CreateDrawableMarker.CreateDrawableFromLayout
 import com.inter.planner.utils.CustomBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,14 +55,20 @@ class JourneyFragment : Fragment() {
     val viewModel: JourneyViewModel by viewModels()
     val binding get() = _binding
 
+
     lateinit var journeyId: String
     lateinit var mapView: MapView
     lateinit var mapController: IMapController
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
 
+    var selectItem: PlaceEntity? = null
 
-    lateinit var selectItem: PlaceEntity
+    lateinit var adapter: PlaceAdapter
+    lateinit var gridPlace: GridView
+
+    var isOnTop: Boolean = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -73,11 +81,36 @@ class JourneyFragment : Fragment() {
                 viewModel.getJourney(this)
             }
         }
+        gridPlace = binding.bottomSheet.gvPlaceImg
+        adapter = PlaceAdapter()
+        gridPlace.adapter = adapter
+
+        gridPlace.setOnScrollListener(object : AbsListView.OnScrollListener {
+            override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
+
+            }
+
+            override fun onScroll(
+                view: AbsListView?,
+                firstVisibleItem: Int,
+                visibleItemCount: Int,
+                totalItemCount: Int
+            ) {
+                isOnTop = false
+                if (firstVisibleItem == 0) {
+                    isOnTop = true
+                }
+
+            }
+
+        })
+
 
         val windowManager =
             requireActivity().getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val widthPixels = displayMetrics.widthPixels
         val heightPixels = displayMetrics.heightPixels
 
         bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet.root)
@@ -92,12 +125,11 @@ class JourneyFragment : Fragment() {
 
                     BottomSheetBehavior.STATE_EXPANDED -> {
 
-                        binding.bottomSheet.gvPlaceImg.adapter
 //                        selectItem?.listImage?.apply {
 //                            if (this.isNotEmpty()) {
 //                                val imageview = binding.bottomSheet.ivPlaces
 //                                val path = this.first().path
-//                                Glide.with(this@JourneyFragment)
+//                                Glide.with(this@JourneyActivity)
 //                                    .load(path)
 //                                    .apply(RequestOptions().centerCrop())
 //                                    .transition(DrawableTransitionOptions.withCrossFade())
@@ -105,21 +137,32 @@ class JourneyFragment : Fragment() {
 //                            }
 //                        }
 
+
                         Log.d("BOTTOM_SHEET", "STATE_EXPANDED")
                     }
 
                     BottomSheetBehavior.STATE_COLLAPSED -> {
                         Log.d("BOTTOM_SHEET", "STATE_COLLAPSED")
-                        // bottomSheetBehavior.setPeekHeight(0, true)
+                        bottomSheetBehavior.setPeekHeight(heightPixels / 4, true)
                     }
 
-                    BottomSheetBehavior.STATE_HALF_EXPANDED -> {
-                        Log.d("BOTTOM_SHEET", "STATE_HALF_EXPANDED")
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+                        Log.d("BOTTOM_SHEET", "STATE_HIDDEN")
                         //bottomSheetBehavior.setPeekHeight(heightPixels / 4, true)
                     }
 
                     BottomSheetBehavior.STATE_SETTLING -> {
                         Log.d("BOTTOM_SHEET", "STATE_SETTLING")
+
+                    }
+
+                    BottomSheetBehavior.STATE_DRAGGING -> {
+                        if (!isOnTop) {
+                            (bottomSheetBehavior as BottomSheetBehavior<*>).state =
+                                BottomSheetBehavior.STATE_EXPANDED
+                        }
+
+
                     }
 
                     BottomSheetBehavior.STATE_HALF_EXPANDED -> {
@@ -136,26 +179,21 @@ class JourneyFragment : Fragment() {
             }
 
         })
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    findNavController().popBackStack()
-                }
-            })
+
 
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED)
+            lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED)
             {
                 viewModel.journey.observe(
-                    viewLifecycleOwner,
-                    object : Observer<com.inter.entity.planner.JourneyEntity> {
+                    requireActivity(),
+                    object : Observer<JourneyEntity> {
                         override fun onChanged(value: JourneyEntity) {
 
 
-
                             if (value.listPlaces.isNotEmpty()) {
+                                adapter.submitNewList(value.listPlaces)
+
                                 val firstPoint = value.listPlaces.first()
                                 val lastPoint = value.listPlaces.last()
 
@@ -186,7 +224,10 @@ class JourneyFragment : Fragment() {
         }
 
         Configuration.getInstance()
-            .load(requireContext(), PreferenceManager.getDefaultSharedPreferences(requireContext()))
+            .load(
+                requireContext(),
+                PreferenceManager.getDefaultSharedPreferences(requireContext())
+            )
         mapView = binding.map
         mapController = mapView.controller
 
@@ -202,6 +243,10 @@ class JourneyFragment : Fragment() {
         mapView.controller.setZoom(15.0)
         mapView.controller.setCenter(location)
 
+
+        binding.llBackup.setOnClickListener {
+            viewModel.uploadJourneyToServer()
+        }
 
 
         mapView.overlays.add(MapEventsOverlay(object : MapEventsReceiver {
@@ -240,14 +285,14 @@ class JourneyFragment : Fragment() {
 
 
 
+
         return binding.root
 
     }
 
-
     fun addMarkerOnMap(place: PlaceEntity, geoPoint: GeoPoint, order: Int) {
 
-        val newMarker = CreateDrawableFromLayout(requireActivity(), order)
+        val newMarker = CreateDrawableMarker.CreateDrawableFromLayout(requireContext(), order)
 
         Marker(mapView)?.apply {
             this.icon = newMarker
@@ -275,14 +320,6 @@ class JourneyFragment : Fragment() {
         return polyline
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        //  showBottomSheet()
-
-        // TODO: Use the ViewModel
-    }
-
-
     fun showBottomSheet() {
         val bottomSheetFragment = CustomBottomSheet()
         bottomSheetFragment.show(requireActivity().supportFragmentManager, bottomSheetFragment.tag)
@@ -297,6 +334,5 @@ class JourneyFragment : Fragment() {
 
         }
     }
-
 
 }

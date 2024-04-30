@@ -4,7 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".journey.JourneyFragment">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:fitsSystemWindows="true">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize" />
+
+
+    </com.google.android.material.appbar.AppBarLayout>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -13,17 +29,19 @@
         <org.osmdroid.views.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
-            android:paddingRight="20dp"
-            android:paddingBottom="20dp"
-            android:layout_height="0dp"
             android:layout_width="0dp"
+            android:layout_height="0dp"
             android:gravity="bottom|right"
             android:orientation="vertical"
-            app:layout_constraintRight_toRightOf="parent"
+            android:paddingRight="20dp"
+            android:paddingBottom="20dp"
             app:layout_constraintBottom_toTopOf="@+id/llFunction"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_percent="0.2">
 
@@ -46,16 +64,18 @@
 
         <LinearLayout
             android:id="@+id/llFunction"
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:background="@drawable/rectangle_solid"
-            android:gravity="bottom"
             android:orientation="horizontal"
+
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHeight_percent="0.1"
             app:layout_constraintLeft_toLeftOf="parent">
 
             <LinearLayout
+                android:id="@+id/ll_backup"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
@@ -64,7 +84,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:src="@drawable/ic_altitude" />
+                    android:src="@drawable/ic_backup_server" />
 
 
             </LinearLayout>
@@ -174,14 +194,10 @@
 
             </HorizontalScrollView>
         </LinearLayout>
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        <include
-            android:id="@+id/bottomSheet"
-            layout="@layout/custom_bottom_sheet" />
-
-
+    <include
+        android:id="@+id/bottomSheet"
+        layout="@layout/custom_bottom_sheet" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

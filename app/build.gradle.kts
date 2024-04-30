@@ -58,7 +58,8 @@ dependencies {
 
 
     implementation(project(":feature:explore"))
-    implementation(project(":feature:planner"))
+//    implementation(project(":feature:planner"))
+    implementation(project(":feature:home"))
     implementation(project(":feature:map"))
     implementation(project(":feature:gear"))
     implementation(project(":feature:profile"))

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_home"
+    app:startDestination="@id/fr_home">
+    <fragment
+        android:id="@+id/fr_home"
+        android:name="com.example.home.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+
+        <action
+            android:id="@+id/act_fr_journey"
+            app:destination="@+id/activity_home">
+            <argument
+                android:name="journey_id"
+                android:defaultValue="0"
+                app:argType="string" />
+
+        </action>
+    </fragment>
+
+
+    <activity
+        android:id="@+id/activity_home"
+        android:name="com.example.home.HomeActivity"
+        tools:layout="@layout/activity_home"
+        />
+
+
+<!--    <activity-->
+<!--        android:id="@+id/testing_activity"-->
+<!--        android:name="com.inter.planner.journey.JourneyActivity"-->
+<!--        tools:layout="@layout/activity_journey" />-->
+
+
+</navigation>

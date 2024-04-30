@@ -2,8 +2,8 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/fr_map"
-    android:id="@+id/nav_planner_main">
+    android:id="@+id/nav_planner_main"
+    app:startDestination="@id/fr_journey">
 
     <fragment
         android:id="@+id/fr_map"
@@ -11,4 +11,10 @@
         tools:layout="@layout/fragment_map">
 
     </fragment>
+
+
+    <fragment
+        android:id="@+id/fr_journey"
+        android:name="com.inter.planner.journey.JourneyFragment"
+        tools:layout="@layout/fragment_journey_map" />
 </navigation>

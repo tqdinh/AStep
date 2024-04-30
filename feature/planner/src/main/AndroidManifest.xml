@@ -3,9 +3,8 @@
 
     <application>
         <activity
-            android:name=".journey.TmpActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AStep" />
+            android:name=".ToDeleteActivity"
+            android:exported="false" />
         <activity
             android:name=".journey.JourneyActivity"
             android:exported="false" />
