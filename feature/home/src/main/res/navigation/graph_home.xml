@@ -3,16 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_home"
-    app:startDestination="@id/fr_journey"
-
-    >
-
-    <!--    <fragment-->
-    <!--        android:id="@+id/fr_map"-->
-    <!--        android:name="com.inter.planner.map.JourneyMapFragment"-->
-    <!--        tools:layout="@layout/fragment_map">-->
-
-    <!--    </fragment>-->
+    app:startDestination="@id/fr_journey">
 
 
     <fragment
@@ -20,5 +11,14 @@
         android:name="com.example.home.journey.JourneyFragment"
         tools:layout="@layout/fragment_journey">
 
+        <action
+            android:id="@+id/act_journey_camera"
+            app:destination="@+id/fr_camera"></action>
     </fragment>
+
+    <fragment
+        android:id="@+id/fr_camera"
+        android:name="com.example.home.camera.CameraFragment"
+        tools:layout="@layout/fragment_camera" />
+
 </navigation>

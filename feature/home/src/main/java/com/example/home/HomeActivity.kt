@@ -29,13 +29,10 @@ class HomeActivity : AppCompatActivity() {
             val journeyId = getString("journey_id")
             val bundle = bundleOf("journey_id" to journeyId)
 
-
             val navHostFragment =
                 supportFragmentManager.findFragmentById(R.id.nav_home_host) as NavHostFragment
             navHostFragment.navController.setGraph(R.navigation.graph_home, bundle)
 
         }
-
-
     }
 }

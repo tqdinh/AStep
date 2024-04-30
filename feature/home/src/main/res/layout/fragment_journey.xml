@@ -7,19 +7,19 @@
     android:fitsSystemWindows="true"
     tools:context=".journey.JourneyFragment">
 
-<!--    <com.google.android.material.appbar.AppBarLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:background="@android:color/white"-->
-<!--        android:fitsSystemWindows="true">-->
+    <!--    <com.google.android.material.appbar.AppBarLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:background="@android:color/white"-->
+    <!--        android:fitsSystemWindows="true">-->
 
-<!--        <com.google.android.material.appbar.MaterialToolbar-->
-<!--            android:id="@+id/toolbar"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="?attr/actionBarSize" />-->
+    <!--        <com.google.android.material.appbar.MaterialToolbar-->
+    <!--            android:id="@+id/toolbar"-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="?attr/actionBarSize" />-->
 
 
-<!--    </com.google.android.material.appbar.AppBarLayout>-->
+    <!--    </com.google.android.material.appbar.AppBarLayout>-->
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -45,10 +45,20 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_percent="0.2">
 
+
+            <ImageView
+                android:layout_marginBottom="10dp"
+                android:id="@+id/ivAddPlace"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rectangle_solid"
+                android:src="@drawable/ic_add_place" />
+
             <ImageView
                 android:id="@+id/ivTarget"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/rectangle_solid"
                 android:src="@drawable/ic_target" />
 
@@ -56,7 +66,7 @@
                 android:id="@+id/ivCurrentLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/rectangle_solid"
                 android:src="@drawable/ic_navigate_me" />
 
@@ -197,5 +207,5 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <include layout="@layout/custom_bottom_sheet" />
+    <include layout="@layout/place_bottom_sheet" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

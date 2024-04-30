@@ -4,19 +4,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.home.databinding.CustomBottomSheetBinding
+import com.example.home.databinding.CustomBottomSheetDialogBinding
+
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 
-class CustomBottomSheet : BottomSheetDialogFragment() {
+class CustomBottomSheetDialog(val onSelectCameraGalary: OnSelectCameraGalary) :
+    BottomSheetDialogFragment() {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        val binding = CustomBottomSheetBinding.inflate(inflater, container, false)
+        val binding = CustomBottomSheetDialogBinding.inflate(inflater, container, false)
+        binding.llCamera.setOnClickListener {
+            onSelectCameraGalary.onSelectCamera()
+            this.dismiss()
+        }
+
+        binding.llGalary.setOnClickListener {
+            onSelectCameraGalary.onSelectGalary()
+        }
         return binding.root
 
     }
@@ -31,6 +39,11 @@ class CustomBottomSheet : BottomSheetDialogFragment() {
 
         bottomSheetBehavior.isHideable = false
 
-        // You can customize the content of the bottom sheet here
+    }
+
+
+    interface OnSelectCameraGalary {
+        fun onSelectCamera()
+        fun onSelectGalary()
     }
 }

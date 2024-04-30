@@ -12,7 +12,6 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.AbsListView
 import android.widget.GridView
-import android.widget.ImageView
 
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
@@ -21,15 +20,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.RequestOptions
+import androidx.navigation.fragment.findNavController
 import com.example.home.R
 import com.example.home.adapter.PlaceAdapter
-
 import com.example.home.databinding.FragmentJourneyBinding
+
+
 import com.example.home.utils.CreateDrawableMarker
-import com.example.home.utils.CustomBottomSheet
+import com.example.home.utils.CustomBottomSheetDialog
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.inter.entity.planner.JourneyEntity
@@ -79,7 +77,6 @@ class JourneyFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentJourneyBinding.inflate(inflater, container, false)
-        //inflater.inflate(R.layout., container, false)
         arguments?.apply {
             (getString("journey_id"))?.apply {
                 journeyId = this
@@ -88,7 +85,7 @@ class JourneyFragment : Fragment() {
         }
 
         gridPlace = binding.root.findViewById(R.id.gvPlaceImg)
-        bottomSheet =binding.root.findViewById(R.id.bottomSheet)
+        bottomSheet = binding.root.findViewById(R.id.bottomSheet)
 
         adapter = PlaceAdapter()
         gridPlace.adapter = adapter
@@ -165,64 +162,11 @@ class JourneyFragment : Fragment() {
 
                     }
                 }
-
-
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-
             }
-
         })
-//
-
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED)
-            {
-                viewModel.journey.observe(
-                    requireActivity(),
-                    object : Observer<JourneyEntity> {
-                        override fun onChanged(value: JourneyEntity) {
-
-
-                            if (value.listPlaces.isNotEmpty()) {
-                                adapter.submitNewList(value.listPlaces)
-
-                                val firstPoint = value.listPlaces.first()
-                                val lastPoint = value.listPlaces.last()
-
-                                val dayInterVal =
-                                    Math.abs(lastPoint.timestamp - firstPoint.timestamp) / (1000 * 60 * 60)
-                                binding.tvEstTime.text = dayInterVal.toString() + "hours"
-                                binding.tvTotalCheckPoints.text =
-                                    value.listPlaces.size.toString()
-
-                                mapController.animateTo(
-                                    GeoPoint(
-                                        firstPoint.lat,
-                                        firstPoint.lon
-                                    )
-                                )
-                            }
-
-
-                            val listGeo = value.listPlaces.map {
-                                GeoPoint(it.lat, it.lon)
-                            }
-
-                            value.listPlaces.forEachIndexed { indx, place ->
-                                addMarkerOnMap(place, GeoPoint(place.lat, place.lon), indx)
-                            }
-
-                            AddPolyline(listGeo)
-
-
-                        }
-
-                    })
-            }
-        }
 
         Configuration.getInstance()
             .load(
@@ -281,8 +225,12 @@ class JourneyFragment : Fragment() {
                     mapController.setZoom(18)
                 }
             }
-
         })
+
+        binding.ivAddPlace.setOnClickListener {
+            showBottomSheet()
+        }
+
 
 
 
@@ -322,11 +270,23 @@ class JourneyFragment : Fragment() {
     }
 
     fun showBottomSheet() {
-        val bottomSheetFragment = CustomBottomSheet()
+        val bottomSheetFragment =
+            CustomBottomSheetDialog(object : CustomBottomSheetDialog.OnSelectCameraGalary {
+                override fun onSelectCamera() {
+
+                    findNavController().navigate(R.id.act_journey_camera)
+                }
+
+                override fun onSelectGalary() {
+                    TODO("Not yet implemented")
+                }
+            })
+
         bottomSheetFragment.show(
             requireActivity().supportFragmentManager,
             bottomSheetFragment.tag
         )
+
     }
 
     fun expandCollapseSheet() {
@@ -340,4 +300,47 @@ class JourneyFragment : Fragment() {
     }
 
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED)
+            {
+                viewModel.journey.observe(
+                    requireActivity(),
+                    object : Observer<JourneyEntity> {
+                        override fun onChanged(value: JourneyEntity) {
+                            if (value.listPlaces.isNotEmpty()) {
+                                adapter.submitNewList(value.listPlaces)
+
+                                val firstPoint = value.listPlaces.first()
+                                val lastPoint = value.listPlaces.last()
+
+                                val dayInterVal =
+                                    Math.abs(lastPoint.timestamp - firstPoint.timestamp) / (1000 * 60 * 60)
+                                binding.tvEstTime.text = dayInterVal.toString() + "hours"
+                                binding.tvTotalCheckPoints.text =
+                                    value.listPlaces.size.toString()
+
+                                mapController.animateTo(
+                                    GeoPoint(
+                                        firstPoint.lat,
+                                        firstPoint.lon
+                                    )
+                                )
+                            }
+
+
+                            val listGeo = value.listPlaces.map {
+                                GeoPoint(it.lat, it.lon)
+                            }
+
+                            value.listPlaces.forEachIndexed { indx, place ->
+                                addMarkerOnMap(place, GeoPoint(place.lat, place.lon), indx)
+                            }
+                            AddPolyline(listGeo)
+                        }
+                    })
+            }
+        }
+    }
 }
