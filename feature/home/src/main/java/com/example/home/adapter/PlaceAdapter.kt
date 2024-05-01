@@ -142,7 +142,7 @@ class PlaceAdapter(val onItemSelectOptionListener: OnItemSelectOptionListener) :
 
             }
             view.tvPlaceDate.text = formattedDate
-            //view.tvPlaceTime.text = formattedTime
+            view.tvPlaceTime.text = formattedTime
 
         }
         view.llDeletePlace.setOnClickListener {
