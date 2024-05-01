@@ -28,13 +28,11 @@ class HomeViewModel @Inject constructor(val repository: JourneyRepository) : Vie
 
     fun migrate() {
         viewModelScope.launch(Dispatchers.IO) {
-            //repository.migrateImages()
+            repository.migrateImages()
         }
     }
 
     fun getPlaceOfJourney(journeyId: String) {
-
-
 
     }
 }

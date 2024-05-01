@@ -28,7 +28,7 @@ class PlannerViewModel @Inject constructor(val repository: JourneyRepository) : 
 
     fun migrate() {
         viewModelScope.launch(Dispatchers.IO) {
-            //repository.migrateImages()
+            repository.migrateImages()
         }
     }
 

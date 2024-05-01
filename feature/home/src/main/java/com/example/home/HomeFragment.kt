@@ -101,7 +101,7 @@ class HomeFragment : Fragment(), EventAdapter.OnItemClickListener {
         super.onActivityCreated(savedInstanceState)
         setupView()
         viewModel.getJourney()
-
+//        viewModel.migrate()
 
         //viewModel.getPlaceOfJourney("9cdca200-1216-4edf-b391-ff6be51f0c54")
 

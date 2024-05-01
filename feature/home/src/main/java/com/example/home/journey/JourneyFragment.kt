@@ -1,9 +1,12 @@
 package com.example.home.journey
 
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.DisplayMetrics
@@ -14,7 +17,6 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.AbsListView
 import android.widget.GridView
-import androidx.compose.material3.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -26,6 +28,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.home.R
 import com.example.home.adapter.PlaceAdapter
 import com.example.home.databinding.FragmentJourneyBinding
+import com.example.home.utils.CalculateDistance
 import com.example.home.utils.CreateDrawableMarker
 import com.example.home.utils.CustomBottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -33,6 +36,8 @@ import com.inter.entity.planner.JourneyEntity
 import com.inter.entity.planner.PlaceEntity
 import com.inter.mylocation.LocationRepository
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
@@ -45,7 +50,6 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import android.app.AlertDialog;
 
 @AndroidEntryPoint
 class JourneyFragment : Fragment() {
@@ -105,15 +109,40 @@ class JourneyFragment : Fragment() {
             }
 
             override fun onNavigatePlace(position: Int) {
-                TODO("Not yet implemented")
+                val place = adapter.listPlaces.get(position)
+                place?.apply {
+                    val latitude = this.lat
+                    val longitude = this.lon
+
+
+
+
+
+                    val gmmIntentUri = Uri.parse("geo:${latitude},${longitude}?z=17&q=${latitude},${longitude}")
+                    val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                    mapIntent.setPackage("com.google.android.apps.maps")
+
+                    startActivity(mapIntent)
+//                    mapIntent.resolveActivity(requireActivity().packageManager)?.let {
+//
+//                    }
+
+//                    val mapIntent = Intent(Intent.ACTION_VIEW, uri)
+//                    mapIntent.setPackage("com.google.android.apps.maps")
+//                    if (mapIntent.resolveActivity(requireActivity().packageManager) != null) {
+//                        requireActivity().startActivity(mapIntent)
+//                    }
+                }
+
             }
 
             override fun onSharePlace(position: Int) {
-                TODO("Not yet implemented")
+
+
             }
 
             override fun onSelectPlace(position: Int) {
-                TODO("Not yet implemented")
+                //  TODO("Not yet implemented")
             }
 
         })
@@ -258,6 +287,7 @@ class JourneyFragment : Fragment() {
 
         binding.ivAddPlace.setOnClickListener {
             showBottomSheet()
+
         }
 
 
@@ -280,6 +310,13 @@ class JourneyFragment : Fragment() {
                 override fun onMarkerClick(marker: Marker?, mapView: MapView?): Boolean {
                     expandCollapseSheet()
                     selectItem = place
+                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                        delay(100)
+                        gridPlace.smoothScrollToPosition(order)
+                    }
+
+
+
                     return true
                 }
 
@@ -354,6 +391,7 @@ class JourneyFragment : Fragment() {
                     object : Observer<JourneyEntity> {
                         override fun onChanged(value: JourneyEntity) {
                             if (value.listPlaces.isNotEmpty()) {
+//                                val reverseList =value.listPlaces.asReversed().subList(0,3)
                                 adapter.submitNewList(value.listPlaces)
 
                                 val firstPoint = value.listPlaces.first()
@@ -382,6 +420,14 @@ class JourneyFragment : Fragment() {
                                 addMarkerOnMap(place, GeoPoint(place.lat, place.lon), indx)
                             }
                             AddPolyline(listGeo)
+
+                            val listCoordinate = value.listPlaces.map {
+                                Pair(it.lat, it.lon)
+                            }
+
+                            val totaldistance = CalculateDistance.GetDistance(listCoordinate)
+                            binding.tvEstDistance.text = totaldistance + "kms"
+
                         }
                     })
             }

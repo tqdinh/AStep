@@ -13,29 +13,54 @@
 
         <TextView
             android:id="@+id/tvPlaceOrder"
-            android:layout_width="40dp"
+            android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:background="@drawable/circle"
             android:gravity="center"
             android:text="1"
             android:textSize="30dp" />
 
-        <TextView
-            android:id="@+id/tvPlaceTime"
+        <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="10dp"
-            android:background="@drawable/circle"
-            android:gravity="center"
-            android:text="14/3/2024" />
+            android:layout_height="match_parent"
+            android:src="@android:drawable/ic_menu_my_calendar" />
 
+        <LinearLayout
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:textColor="@android:color/black"
+                android:id="@+id/tvPlaceDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/circle"
+                android:gravity="center"
+                android:text="14/3/2024" />
+
+            <TextView
+                android:textSize="10dp"
+                android:id="@+id/tvPlaceTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/circle"
+                android:gravity="center_vertical"
+                android:text="15:30" />
+        </LinearLayout>
 
     </LinearLayout>
 
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_margin="10dp"
         android:layout_weight="1"
         android:background="@android:color/holo_green_dark"
         app:layout_constraintBottom_toTopOf="@+id/hvFunctions"
@@ -62,6 +87,7 @@
             android:orientation="horizontal">
 
             <LinearLayout
+                android:id="@+id/llDirection"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
