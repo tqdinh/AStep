@@ -14,6 +14,8 @@ interface CoreDatabase {
 
     fun migrateImages()
 
+    fun createJourney(journey: LocalJourney)
+    fun deleteJourney(journeyId: String)
 
     fun createPlace(place: LocalPlace)
     fun deletePlace(placeId: String)

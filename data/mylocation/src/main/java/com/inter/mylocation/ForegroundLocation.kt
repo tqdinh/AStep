@@ -16,7 +16,6 @@ class ForegroundLocation : LifecycleService() {
     val ACTION_STOP_UPDATES = "ACTION_STOP_UPDATES"
     var stopIntent: PendingIntent? = null
 
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         if (intent?.action == ACTION_STOP_UPDATES) {
@@ -39,7 +38,11 @@ class ForegroundLocation : LifecycleService() {
                 notificationBuilder.setContentIntent(stopIntent)
                 notificationBuilder.setOngoing(true)
 //                notificationBuilder.setAutoCancel(false)
-                notificationBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel,"Stop",stopIntent)
+                notificationBuilder.addAction(
+                    android.R.drawable.ic_menu_close_clear_cancel,
+                    "Stop",
+                    stopIntent
+                )
                 startForeground(1, notificationBuilder.build())
 
             } catch (e: Exception) {
@@ -57,6 +60,11 @@ class ForegroundLocation : LifecycleService() {
         startService(Intent(this, this::class.java))
     }
 
+
+    fun stopService()
+    {
+        stopSelf()
+    }
 
 }
 

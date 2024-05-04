@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -34,6 +35,7 @@ import com.example.home.utils.CustomBottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.inter.entity.planner.JourneyEntity
 import com.inter.entity.planner.PlaceEntity
+import com.inter.mylocation.ForegroundLocation
 import com.inter.mylocation.LocationRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -74,8 +76,7 @@ class JourneyFragment : Fragment() {
     var isOnTop: Boolean = false
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentJourneyBinding.inflate(inflater, container, false)
         arguments?.apply {
@@ -94,9 +95,16 @@ class JourneyFragment : Fragment() {
                 builder.setTitle("You are about to delete this place")
                     .setMessage("It can not be recovered.")
                     .setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
-                        val place = adapter.listPlaces.get(position)
-                        viewModel.deletePlaceAndItsImage(place)
-                        dialog.dismiss() // Close the dialog
+
+                        if (adapter.listPlaces.isNotEmpty()) {
+                            adapter.listPlaces.apply {
+                                val place = this.get(position)
+                                viewModel.deletePlaceAndItsImage(place)
+                                dialog.dismiss() // Close the dialog
+                            }
+                        }
+
+
                     })
                     .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which ->
                         // Handle Cancel button click
@@ -113,12 +121,8 @@ class JourneyFragment : Fragment() {
                 place?.apply {
                     val latitude = this.lat
                     val longitude = this.lon
-
-
-
-
-
-                    val gmmIntentUri = Uri.parse("geo:${latitude},${longitude}?z=17&q=${latitude},${longitude}")
+                    val gmmIntentUri =
+                        Uri.parse("geo:${latitude},${longitude}?z=17&q=${latitude},${longitude}")
                     val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
                     mapIntent.setPackage("com.google.android.apps.maps")
 
@@ -167,7 +171,6 @@ class JourneyFragment : Fragment() {
             }
 
         })
-
 
         val windowManager =
             requireActivity().getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -226,11 +229,9 @@ class JourneyFragment : Fragment() {
             }
         })
 
-        Configuration.getInstance()
-            .load(
-                requireContext(),
-                PreferenceManager.getDefaultSharedPreferences(requireContext())
-            )
+        Configuration.getInstance().load(
+            requireContext(), PreferenceManager.getDefaultSharedPreferences(requireContext())
+        )
         mapView = binding.map
         mapController = mapView.controller
 
@@ -257,8 +258,8 @@ class JourneyFragment : Fragment() {
                 if (binding.llFunction.visibility == View.VISIBLE) {
                     binding.llFunction.visibility = View.GONE
                 } else {
-                    if (binding.llFunction.visibility == View.GONE)
-                        binding.llFunction.visibility = View.VISIBLE
+                    if (binding.llFunction.visibility == View.GONE) binding.llFunction.visibility =
+                        View.VISIBLE
                 }
 
 
@@ -275,7 +276,37 @@ class JourneyFragment : Fragment() {
 
         mapController.setZoom(13)
 
+        binding.ivStartStop.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+
+            }
+
+        })
+
         binding.ivCurrentLocation.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+
+                if (!viewModel.journey.value?.listPlaces.isNullOrEmpty()) {
+                    viewModel.journey.value?.listPlaces?.first()?.apply {
+                        mapController.animateTo(
+                            GeoPoint(
+                                this.lat, this.lon
+                            )
+                        )
+                    }
+
+                }
+
+
+//                val myPrevLocation = LocationRepository.myLocation?.value
+//                myPrevLocation?.apply {
+//                    mapController.animateTo(GeoPoint(this.latitude, this.longitude))
+//                    mapController.setZoom(18)
+//                }
+            }
+        })
+
+        binding.ivTarget.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View?) {
                 val myPrevLocation = LocationRepository.myLocation?.value
                 myPrevLocation?.apply {
@@ -290,9 +321,12 @@ class JourneyFragment : Fragment() {
 
         }
 
-
-
-
+        viewLifecycleOwner.lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                val service = Intent(requireActivity(), ForegroundLocation::class.java)
+                requireActivity().startService(service)
+            }
+        }
 
         return binding.root
 
@@ -314,9 +348,6 @@ class JourneyFragment : Fragment() {
                         delay(100)
                         gridPlace.smoothScrollToPosition(order)
                     }
-
-
-
                     return true
                 }
 
@@ -350,8 +381,7 @@ class JourneyFragment : Fragment() {
             })
 
         bottomSheetFragment.show(
-            requireActivity().supportFragmentManager,
-            bottomSheetFragment.tag
+            requireActivity().supportFragmentManager, bottomSheetFragment.tag
         )
 
     }
@@ -371,46 +401,31 @@ class JourneyFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED)
-            {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 journeyId?.apply {
                     viewModel.getJourney(journeyId)
                 }
-
-
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.journey.observe(requireActivity(), object : Observer<JourneyEntity> {
+                    override fun onChanged(value: JourneyEntity) {
+                        adapter.submitNewList(value.listPlaces)
 
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED)
-            {
-
-                viewModel.journey.observe(
-                    requireActivity(),
-                    object : Observer<JourneyEntity> {
-                        override fun onChanged(value: JourneyEntity) {
-                            if (value.listPlaces.isNotEmpty()) {
-//                                val reverseList =value.listPlaces.asReversed().subList(0,3)
-                                adapter.submitNewList(value.listPlaces)
-
-                                val firstPoint = value.listPlaces.first()
-                                val lastPoint = value.listPlaces.last()
-
-                                val dayInterVal =
-                                    Math.abs(lastPoint.timestamp - firstPoint.timestamp) / (1000 * 60 * 60)
-                                binding.tvEstTime.text = dayInterVal.toString() + "hours"
-                                binding.tvTotalCheckPoints.text =
-                                    value.listPlaces.size.toString()
-
-                                mapController.animateTo(
-                                    GeoPoint(
-                                        firstPoint.lat,
-                                        firstPoint.lon
-                                    )
+                        if (value.listPlaces.isNotEmpty()) {
+                            val firstPoint = value.listPlaces.first()
+                            val lastPoint = value.listPlaces.last()
+                            val dayInterVal =
+                                Math.abs(lastPoint.timestamp - firstPoint.timestamp) / (1000 * 60 * 60)
+                            binding.tvEstTime.text = dayInterVal.toString() + "hours"
+                            binding.tvTotalCheckPoints.text = value.listPlaces.size.toString()
+                            mapController.animateTo(
+                                GeoPoint(
+                                    firstPoint.lat, firstPoint.lon
                                 )
-                            }
-
+                            )
 
                             val listGeo = value.listPlaces.map {
                                 GeoPoint(it.lat, it.lon)
@@ -427,10 +442,38 @@ class JourneyFragment : Fragment() {
 
                             val totaldistance = CalculateDistance.GetDistance(listCoordinate)
                             binding.tvEstDistance.text = totaldistance + "kms"
-
                         }
-                    })
+
+
+                    }
+                })
             }
         }
+
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            LocationRepository.myLocation.observe(viewLifecycleOwner, object : Observer<Location> {
+                override fun onChanged(value: Location) {
+//                    viewModel.
+
+//                    binding.btnForeGround.text = "" + value.latitude + ":" + value.longitude
+                }
+
+            })
+        }
+
     }
+
+    fun startLocationForegroundService() {
+        val service = Intent(requireActivity(), ForegroundLocation::class.java)
+        requireActivity().startService(service)
+    }
+
+    fun stopLocationForegroundService() {
+
+        val serviceIntent = Intent(context, ForegroundLocation::class.java)
+        context?.stopService(serviceIntent)
+    }
+
+
 }

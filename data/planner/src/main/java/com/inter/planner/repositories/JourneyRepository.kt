@@ -2,7 +2,6 @@ package com.inter.planner.repositories
 
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.inter.planner.datasources.JourneyLocalDatasource
@@ -15,15 +14,12 @@ import com.inter.planner.datasources.ImageLocalDataSource
 import com.inter.planner.datasources.PlaceLocalDatasource
 import com.inter.planner.datasources.RemoteImage
 import com.inter.planner.datasources.RemotePlace
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -43,6 +39,9 @@ interface JourneyRepository {
     fun backupPlaceToServer(placeEntity: PlaceEntity): Flow<ApiResult<PlaceEntity>>
 
 
+    suspend fun createJourney(journeyEntity: JourneyEntity): ApiResult<*>
+    suspend fun deleteJourney(journeyId: String): ApiResult<*>
+
     suspend fun createPlace(placeEntity: PlaceEntity): PlaceEntity
     suspend fun deletePlace(placeId: String): String?
     suspend fun deleteImage(imageId: String): String
@@ -52,17 +51,16 @@ interface JourneyRepository {
 }
 
 class JourneyRepositoryImpl @Inject constructor(
-    val local: JourneyLocalDatasource,
+    val localJourney: JourneyLocalDatasource,
     val localPlaceDataSource: PlaceLocalDatasource,
     val localImageDatasource: ImageLocalDataSource,
     val remote: RemoteJourney,
     val remotePlace: RemotePlace,
     val remoteImage: RemoteImage,
-) :
-    JourneyRepository, Parcelable {
-    private val _listJourney: MutableLiveData<List<com.inter.entity.planner.JourneyEntity>> =
+) : JourneyRepository, Parcelable {
+    private val _listJourney: MutableLiveData<MutableList<com.inter.entity.planner.JourneyEntity>> =
         MutableLiveData()
-    val listJourney: LiveData<List<com.inter.entity.planner.JourneyEntity>> = _listJourney
+    val listJourney: LiveData<MutableList<com.inter.entity.planner.JourneyEntity>> = _listJourney
 
     private val _listnumber: MutableLiveData<List<Int>> = MutableLiveData()
     val listnumber: LiveData<List<Int>> = _listnumber
@@ -78,94 +76,74 @@ class JourneyRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getListJourney() {
-        val myListJourney: List<JourneyEntity>? = local.getListJourney()
-        withContext(Dispatchers.Main)
-        {
+        val myListJourney: MutableList<JourneyEntity>? = localJourney.getListJourney()
+        withContext(Dispatchers.Main) {
             _listJourney.value = myListJourney
         }
         myListJourney?.forEach {
-            val places: MutableList<PlaceEntity> =
-                local.getJourneyPlaces(it.id).places.map {
-                    return@map PlaceEntity(
-                        it.id,
-                        it.ref_journey_id,
-                        it.timestamp,
-                        it.title,
-                        it.desc,
-                        it.lat,
-                        it.lon
-                    )
-                }.toMutableList()
+            val places: MutableList<PlaceEntity> = localJourney.getJourneyPlaces(it.id).places.map {
+                return@map PlaceEntity(
+                    it.id, it.ref_journey_id, it.timestamp, it.title, it.desc, it.lat, it.lon
+                )
+            }.toMutableList()
             it.listPlaces = places
 
             places?.forEach { place ->
-                val listOfImages = local.getPlaceImages(place.id).images
+                val listOfImages = localJourney.getPlaceImages(place.id).images
                 place.listImage = listOfImages.map { lcal ->
                     return@map ImageEntity(
-                        lcal.id,
-                        lcal.ref_place_id,
-                        lcal.path,
-                        ""
+                        lcal.id, lcal.ref_place_id, lcal.path, ""
                     )
                 }.toMutableList()
             }
         }
 
-        withContext(Dispatchers.Main)
-        {
+        withContext(Dispatchers.Main) {
             _listJourney.value = myListJourney
         }
 
     }
 
     override fun getListJourneyFlow(): Flow<List<JourneyEntity>> = flow {
-        val myListJourney = local.getListJourney()
+        val myListJourney = localJourney.getListJourney()
         myListJourney?.apply {
             emit(this)
         }
 
     }
 
-    override fun getJourney(journeyId: String): Flow<JourneyEntity> =
-        flow<JourneyEntity> {
+    override fun getJourney(journeyId: String): Flow<JourneyEntity> = flow<JourneyEntity> {
 
-            val journeyPlace = local.getJourneyPlaces(journeyId)
-            val journey = journeyPlace.journey
-            val places = journeyPlace.places.map {
-                return@map PlaceEntity(
-                    id = it.id,
-                    ref_journey_id = it.ref_journey_id,
-                    timestamp = it.timestamp,
-                    title = it.title,
-                    desc = it.desc,
-                    lat = it.lat,
-                    lon = it.lon,
-                    listImage = local.getPlaceImages(it.id).images.map { img ->
-                        return@map ImageEntity(
-                            img.id,
-                            img.ref_place_id,
-                            img.path,
-                            ""
-                        )
-                    }.toMutableList()
-                )
-            }.toMutableList()
-
-            emit(
-                JourneyEntity(
-                    journey.id,
-                    journey.timestamp,
-                    journey.title,
-                    journey.desc,
-                    places
-                )
+        val journeyPlace = localJourney.getJourneyPlaces(journeyId)
+        val journey = journeyPlace.journey
+        val places = journeyPlace.places.map {
+            return@map PlaceEntity(
+                id = it.id,
+                ref_journey_id = it.ref_journey_id,
+                timestamp = it.timestamp,
+                title = it.title,
+                desc = it.desc,
+                lat = it.lat,
+                lon = it.lon,
+                listImage = localJourney.getPlaceImages(it.id).images.map { img ->
+                    return@map ImageEntity(
+                        img.id, img.ref_place_id, img.path, ""
+                    )
+                }.toMutableList()
             )
+        }.toMutableList()
 
-        }.flowOn(Dispatchers.IO)
+        emit(
+            JourneyEntity(
+                journey.id, journey.timestamp, journey.title, journey.desc, places
+            )
+        )
+
+    }.flowOn(Dispatchers.IO)
 
 
     override suspend fun migrateImages() {
-        local.migrateImages()
+        localJourney.migrateImages()
     }
 
     override fun backupJourneyToServer(journeyEntity: JourneyEntity): Flow<ApiResult<JourneyEntity>> =
@@ -235,17 +213,56 @@ class JourneyRepositoryImpl @Inject constructor(
                 emit(ApiResult.Error("Error"))
             }
 
-        }.flowOn(Dispatchers.IO)
-            .onStart {
-                emit(ApiResult.Loading(true))
-            }.catch {
-                emit(ApiResult.Loading(true))
-            }
+        }.flowOn(Dispatchers.IO).onStart {
+            emit(ApiResult.Loading(true))
+        }.catch {
+            emit(ApiResult.Loading(true))
+        }
 
     override fun backupPlaceToServer(placeEntity: PlaceEntity): Flow<ApiResult<PlaceEntity>> =
         flow {
 
         }
+
+    override suspend fun createJourney(journeyEntity: JourneyEntity): ApiResult<*> {
+
+        val ret = localJourney.createJourney(journeyEntity)
+        if (ret is ApiResult.Success) {
+            val entiry = ret.data as JourneyEntity
+            val tmp = listJourney.value
+            tmp?.let {
+                it.add(0, entiry)
+                withContext(Dispatchers.Main)
+                {
+                    _listJourney.value = it
+                }
+
+            }
+            return ApiResult.Success<String>("Create success")
+        }
+
+        return ret
+    }
+
+
+    override suspend fun deleteJourney(journeyId: String): ApiResult<*> {
+        try {
+            val ret = localJourney.deleteJourney(journeyId)
+            val tmp = listJourney.value?.filter {
+                it.id != journeyId
+            }?.toMutableList()
+            withContext(Dispatchers.Main)
+            {
+                _listJourney.value = tmp
+            }
+
+            return ApiResult.Success("Success")
+        } catch (e: Exception) {
+            return ApiResult.Error<Exception>(e)
+        }
+
+
+    }
 
     override suspend fun createPlace(placeEntity: PlaceEntity): PlaceEntity {
         return localPlaceDataSource.createPlace(placeEntity)

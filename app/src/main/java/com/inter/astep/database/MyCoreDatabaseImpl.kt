@@ -41,6 +41,21 @@ class MyCoreDatabaseImpl(val myRoomDatabase: MyRoomDatabase) : CoreDatabase {
         }
     }
 
+    override fun createJourney(journey: LocalJourney) {
+        return try {
+            myRoomDatabase.getLocalJourneyDao().insertLocalJourney(journey)
+        }
+        catch (e:Exception)
+        {
+
+        }
+
+    }
+
+    override fun deleteJourney(journeyId: String) {
+        return myRoomDatabase.getLocalJourneyDao().deleteJourney(journeyId)
+    }
+
     override fun createPlace(placeEntity: LocalPlace) {
         val kkk = myRoomDatabase.getLocalPlaceDao().insertPlace(placeEntity)
         return kkk

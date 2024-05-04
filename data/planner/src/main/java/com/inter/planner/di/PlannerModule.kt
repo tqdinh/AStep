@@ -1,6 +1,7 @@
 package com.inter.planner.di
 
 import com.inter.database.entities.LocalImage
+import com.inter.database.entities.LocalJourney
 import com.inter.database.entities.LocalPlace
 import com.inter.entity.DomainDataMapper
 import com.inter.entity.DomainDbMapper
@@ -24,6 +25,7 @@ import com.inter.planner.datasources.RemotePlace
 import com.inter.planner.dto.ImageDomainDBMapper
 import com.inter.planner.dto.ImageDomainRequestMapper
 import com.inter.planner.dto.JourneyDTO
+import com.inter.planner.dto.JourneyDomainDBMapper
 import com.inter.planner.dto.JourneyDomainDataMapper
 import com.inter.planner.dto.JourneyDomainRequestMapper
 import com.inter.planner.dto.PlaceDomainDBMapper
@@ -45,18 +47,26 @@ object PlannerModule {
     fun providePlaceRepo(
         local: JourneyLocalDatasource,
         localPlaceDatasource: PlaceLocalDatasource,
-        localImageDataSource:ImageLocalDataSource,
+        localImageDataSource: ImageLocalDataSource,
         remote: RemoteJourney,
         remotePlace: RemotePlace,
         remoteImage: RemoteImage
     ): JourneyRepository {
-        return JourneyRepositoryImpl(local, localPlaceDatasource,localImageDataSource, remote, remotePlace, remoteImage)
+        return JourneyRepositoryImpl(
+            local, localPlaceDatasource, localImageDataSource, remote, remotePlace, remoteImage
+        )
     }
 
     @Provides
     @Singleton
     fun provideJourneyMapper(): DomainDataMapper<JourneyEntity, JourneyDTO> {
         return JourneyDomainDataMapper()
+    }
+
+    @Provides
+    @Singleton
+    fun provideJourneyDomainDbMapper(): DomainDbMapper<JourneyEntity, LocalJourney> {
+        return JourneyDomainDBMapper()
     }
 
 
@@ -104,8 +114,7 @@ object PlannerModule {
 
     @Provides
     @Singleton
-    fun provideImageApi(): ImageApi =
-        NetworkUtils.getRetrofit().create(ImageApi::class.java)
+    fun provideImageApi(): ImageApi = NetworkUtils.getRetrofit().create(ImageApi::class.java)
 }
 
 //@Module

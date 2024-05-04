@@ -24,8 +24,8 @@
 
     <activity
         android:id="@+id/activity_home"
-        android:name="com.example.home.HomeActivity"
-        tools:layout="@layout/activity_home"
+        android:name="com.example.home.HomeMainActivity"
+        tools:layout="@layout/activity_home_main"
         />
 
 

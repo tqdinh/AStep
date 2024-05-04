@@ -16,15 +16,19 @@ abstract class LocalJourneyDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertLocalPlace(place: LocalJourney)
+    abstract fun insertLocalJourney(place: LocalJourney)
 
     @Query("SELECT * FROM journey_table WHERE journey_id =:journeyId")
     abstract fun getPlacesOfJourney(journeyId: String): JourneyPlaces
 
     @Query("SELECT * FROM journey_table")
-    abstract fun geJourneyPlaces():List<JourneyPlaces>
+    abstract fun getJourneyPlaces():List<JourneyPlaces>
 
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun updatePlace(place: LocalJourney)
+    abstract fun updateJourney(place: LocalJourney)
+
+
+    @Query("DELETE FROM journey_table WHERE journey_id=:journeyId")
+    abstract fun deleteJourney(journeyId:String)
 }

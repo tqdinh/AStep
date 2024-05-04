@@ -3,8 +3,10 @@ package com.example.home
 import android.content.Context
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.AdapterView.OnItemLongClickListener
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
@@ -27,20 +29,21 @@ class EventAdapter(
         oldItem: com.inter.entity.planner.JourneyEntity,
         newItem: com.inter.entity.planner.JourneyEntity
     ): Boolean {
-        return oldItem.listPlaces.size == newItem.listPlaces.size
+        return oldItem.listPlaces.size == newItem.listPlaces.size && oldItem.id.equals(newItem.id)
     }
 
     override fun areContentsTheSame(
         oldItem: com.inter.entity.planner.JourneyEntity,
         newItem: com.inter.entity.planner.JourneyEntity
     ): Boolean {
-        return oldItem.listPlaces.size == newItem.listPlaces.size
+        return oldItem.listPlaces.size == newItem.listPlaces.size && oldItem.id.equals(newItem.id)
 
     }
 }) {
 
     interface OnItemClickListener {
         fun onItemClick(item: com.inter.entity.planner.JourneyEntity)
+        fun onItemLongClick(item: com.inter.entity.planner.JourneyEntity)
     }
 
 
@@ -62,12 +65,7 @@ class EventAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (position == currentList.size - 1) {
-            return 1
-        } else if (position == 0) {
-            return 0
-        }
-        return 2
+        return position
     }
 
     override fun onBindViewHolder(holder: EventViewHolder, position: Int) {
@@ -109,10 +107,15 @@ class EventAdapter(
                 binding.tvPlaceNumber.text = item.listPlaces.size.toString()
             }
 
+            binding
+                .llPlaces.removeAllViews()
+
             var tmp = 0
             for (place in item.listPlaces) {
                 if (tmp >= 7)
                     break
+
+
 
                 if (place.listImage.isNotEmpty()) {
 
@@ -121,7 +124,6 @@ class EventAdapter(
                     val dayInterVal =
                         Math.abs(lastPlace.timestamp - firstPlace.timestamp) / (1000 * 60 * 60)
                     binding.tvDays.text = dayInterVal.toString() + "hours"
-
                     place.listImage.first().let {
                         val imgPath = it.path
                         val imageView = ImageView(context)
@@ -132,8 +134,6 @@ class EventAdapter(
                         layoutParams.width = width // Set height to 200 pixels
                         layoutParams.height = width
                         imageView.layoutParams = layoutParams
-
-
 
                         bindPhoto(
 //                    "https://media.geeksforgeeks.org/wp-content/cdn-uploads/gfg_200x200-min.png",
@@ -161,6 +161,31 @@ class EventAdapter(
             binding.llPlaces.setOnClickListener {
                 onItemClickListener.onItemClick(item)
             }
+
+            binding.root.setOnLongClickListener(object : View.OnLongClickListener {
+                override fun onLongClick(v: View?): Boolean {
+                    onItemClickListener.onItemLongClick(item)
+                    return true
+                }
+            })
+
+            binding.ivTrackJourney.setOnLongClickListener(object : View.OnLongClickListener {
+                override fun onLongClick(v: View?): Boolean {
+                    onItemClickListener.onItemLongClick(item)
+                    return true
+                }
+
+            })
+
+            binding.llPlaces.setOnLongClickListener(object : View.OnLongClickListener {
+                override fun onLongClick(v: View?): Boolean {
+                    onItemClickListener.onItemLongClick(item)
+                    return true
+                }
+
+            })
+
+
         }
 
 

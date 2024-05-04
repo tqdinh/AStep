@@ -116,32 +116,21 @@ class CameraFragment : Fragment(), LifecycleOwner {
     ): View {
         viewBinding = FragmentCameraBinding.inflate(inflater, container, false)
 //        return inflater.inflate(R.layout.fragment_camera, container, false)
-
-
         arguments?.apply {
             (getString("journey_id"))?.apply {
                 journeyId = this
-
             }
         }
-
-
         requireActivity().onBackPressedDispatcher.addCallback(
             requireActivity(),
             onBackPressedCallback
         );
-
-
-
 
         if (allPermissionsGranted()) {
             startCamera()
         } else {
             requestPermissions()
         }
-
-
-//        cameraExecutor = Executors.newSingleThreadExecutor()
         return viewBinding.root
     }
 
@@ -217,12 +206,9 @@ class CameraFragment : Fragment(), LifecycleOwner {
 
         val photoFile =
             File(getOutputDirectory(), System.currentTimeMillis().toString() + PHOTO_EXTENSION)
-
-
         val outputOptions = ImageCapture.OutputFileOptions
             .Builder(photoFile)
             .build()
-
 
         // Set up image capture listener, which is triggered after photo has
         // been taken
@@ -233,9 +219,12 @@ class CameraFragment : Fragment(), LifecycleOwner {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     val msg = "Photo capture succeeded: ${outputFileResults.savedUri}"
 
-                    viewModel.createPlace(journeyId,outputFileResults.savedUri.toString())
+                    ImageReviewFragment(outputFileResults.savedUri.toString(), onCancel = {
 
-                    Log.d(TAG, msg)
+                    }, onSave = {
+                        viewModel.createPlace(journeyId, outputFileResults.savedUri.toString())
+                    }).show(requireActivity().supportFragmentManager, "Review")
+
                 }
 
                 override fun onError(exception: ImageCaptureException) {
