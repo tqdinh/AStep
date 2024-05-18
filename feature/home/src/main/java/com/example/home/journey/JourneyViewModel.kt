@@ -1,11 +1,15 @@
 package com.example.home.journey
 
+import android.content.ComponentName
+import android.content.ServiceConnection
+import android.os.IBinder
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inter.entity.planner.ApiResult
 import com.inter.entity.planner.PlaceEntity
+import com.inter.mylocation.BackgroundLocationService
 import com.inter.planner.repositories.JourneyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -17,10 +21,16 @@ import javax.inject.Inject
 class JourneyViewModel @Inject constructor(val repository: JourneyRepository) : ViewModel() {
 
 
-    val _journey: MutableLiveData<com.inter.entity.planner.JourneyEntity> = MutableLiveData()
+    var mBinder: BackgroundLocationService.BackgroundLocationBindder? = null
+//    fun setBindService(binder: BackgroundLocationService.BackgroundLocationBindder) {
+//        mBinder = binder
+//    }
+
+    private val _journey: MutableLiveData<com.inter.entity.planner.JourneyEntity> =
+        MutableLiveData()
     val journey: LiveData<com.inter.entity.planner.JourneyEntity> = _journey
 
-    val _syncJourney: MutableLiveData<Boolean> = MutableLiveData()
+    private val _syncJourney: MutableLiveData<Boolean> = MutableLiveData()
     val syncJourney: LiveData<Boolean> = _syncJourney
     fun getJourney(journeyId: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -35,6 +45,52 @@ class JourneyViewModel @Inject constructor(val repository: JourneyRepository) : 
         }
 
     }
+
+    val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder: BackgroundLocationService.BackgroundLocationBindder =
+                service as BackgroundLocationService.BackgroundLocationBindder
+            mBinder = binder
+            if (null != binder.getJourney())
+                _syncJourney.value = true
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+
+        }
+
+    }
+
+    fun isTracking(): Boolean {
+
+        var ret = false
+
+        mBinder?.apply {
+            ret = this.getJourney() != null
+        }
+
+        return ret
+    }
+
+
+    fun setDataForbindService() {
+        mBinder?.apply {
+
+            if (null != journey.value) {
+                setForgoundLocationUpdate(journey.value)
+                _syncJourney.value = true
+            }
+        }
+    }
+
+    fun removeDatabindService() {
+        mBinder?.apply {
+            _syncJourney.value = false
+            setForgoundLocationUpdate(null)
+        }
+
+    }
+
 
     fun uploadJourneyToServer() {
         viewModelScope.launch(Dispatchers.Main) {
@@ -83,9 +139,9 @@ class JourneyViewModel @Inject constructor(val repository: JourneyRepository) : 
                     _journey.value = _journey.value
                 }
             }
-
-
         }
 
     }
+
+
 }

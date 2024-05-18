@@ -25,6 +25,9 @@ class CameraViewModel @Inject constructor(val repository: JourneyRepository) : V
 
 
     fun createPlace(journeyId: String, imagePath: String) {
+
+        LocationRepository.getCurrentLocation()
+
         var placeEntity: PlaceEntity? = null
         myLocation.value?.apply {
 

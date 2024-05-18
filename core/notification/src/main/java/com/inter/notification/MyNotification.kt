@@ -29,8 +29,8 @@ class MyNotification constructor(val context: Context) {
     fun createNotificationBuilder(): NotificationCompat.Builder {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_close_clear_cancel)
-            .setContentTitle("Notification")
-            .setContentText("Demo notification")
+            .setContentTitle("Astep")
+            .setContentText("Location in use")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         return builder
     }
@@ -43,13 +43,6 @@ class MyNotification constructor(val context: Context) {
                 Manifest.permission.POST_NOTIFICATIONS
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return
         }
         NotificationManagerCompat.from(context).notify(1, builder.build())

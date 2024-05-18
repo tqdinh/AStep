@@ -124,6 +124,9 @@
 
 
                     <LinearLayout
+
+                        android:id="@+id/llStartStop"
+                        android:visibility="visible"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="2dp"
@@ -137,8 +140,9 @@
                             android:text="Record/Stop" />
 
                         <ImageView
-                            android:src="@drawable/ic_record"
                             android:id="@+id/ivStartStop"
+                            android:src="@drawable/ic_record"
+
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="40(hrs)"

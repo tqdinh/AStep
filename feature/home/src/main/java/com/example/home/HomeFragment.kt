@@ -25,6 +25,7 @@ import com.inter.entity.planner.ApiResult
 import com.inter.entity.planner.JourneyEntity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -172,35 +173,36 @@ class HomeFragment : Fragment(), EventAdapter.OnItemClickListener {
 
     fun deleteJourney(journeyId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.deleteJourney(journeyId).collect()
-            {
-                when (it) {
-                    is ApiResult.Success -> {
+            viewModel.deleteJourney(journeyId)
+                .collect()
+                {
+                    when (it) {
+                        is ApiResult.Success -> {
 
-                    }
-
-                    is ApiResult.Error<*> -> {
-
-                    }
-
-                    is ApiResult.Loading -> {
-                        if (true == it.data)
-                            withContext(Dispatchers.Main)
-                            {
-                                progressDialog.show()
-                            }
-                        else {
-                            withContext(Dispatchers.Main)
-                            { progressDialog.hide() }
                         }
 
-                    }
+                        is ApiResult.Error<*> -> {
 
-                    else -> {
+                        }
 
+                        is ApiResult.Loading -> {
+                            if (true == it.data)
+                                withContext(Dispatchers.Main)
+                                {
+                                    progressDialog.show()
+                                }
+                            else {
+                                withContext(Dispatchers.Main)
+                                { progressDialog.hide() }
+                            }
+
+                        }
+
+                        else -> {
+
+                        }
                     }
                 }
-            }
         }
     }
 

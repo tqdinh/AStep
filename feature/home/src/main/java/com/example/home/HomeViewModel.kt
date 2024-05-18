@@ -10,11 +10,14 @@ import com.inter.planner.repositories.JourneyRepository
 import com.inter.planner.repositories.JourneyRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 import javax.inject.Inject
@@ -55,6 +58,7 @@ class HomeViewModel @Inject constructor(val repository: JourneyRepository) : Vie
 
     suspend fun deleteJourney(journeyId: String): Flow<ApiResult<*>> = flow<ApiResult<*>> {
         try {
+
             repository.deleteJourney(journeyId)
             emit(ApiResult.Success<Boolean>(true))
         } catch (e: Exception) {
@@ -80,6 +84,7 @@ class HomeViewModel @Inject constructor(val repository: JourneyRepository) : Vie
     fun getPlaceOfJourney(journeyId: String) {
 
     }
+
 }
 
 

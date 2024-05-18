@@ -2,6 +2,7 @@ package com.inter.mylocation
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
 import android.location.Location
 import android.os.Looper
 import android.util.Log
@@ -38,7 +39,6 @@ object LocationRepository {
 
     }
 
-
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
     private fun getLocationRequest(): LocationRequest {
         val locationBuilder = LocationRequest.Builder(1000 * LOCATION_UPDATE_INTERVAL)
@@ -49,11 +49,19 @@ object LocationRepository {
     }
 
     @SuppressLint("MissingPermission")
-    fun startLocationUpdates(application: Application) {
+    fun startLocationUpdates(context: Context) {
 
         fusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(application.applicationContext)
+            LocationServices.getFusedLocationProviderClient(context)
 
+        fusedLocationProviderClient?.requestLocationUpdates(
+            getLocationRequest(), callback, Looper.getMainLooper()
+        )
+    }
+
+
+    fun getCurrentLocation()
+    {
         fusedLocationProviderClient?.requestLocationUpdates(
             getLocationRequest(), callback, Looper.getMainLooper()
         )

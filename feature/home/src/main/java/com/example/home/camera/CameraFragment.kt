@@ -60,7 +60,8 @@ class CameraFragment : Fragment(), LifecycleOwner {
 
     val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            findNavController().popBackStack()
+//            findNavController().popBackStack()
+            findNavController().navigateUp()
         }
     }
 
@@ -115,7 +116,6 @@ class CameraFragment : Fragment(), LifecycleOwner {
         savedInstanceState: Bundle?
     ): View {
         viewBinding = FragmentCameraBinding.inflate(inflater, container, false)
-//        return inflater.inflate(R.layout.fragment_camera, container, false)
         arguments?.apply {
             (getString("journey_id"))?.apply {
                 journeyId = this

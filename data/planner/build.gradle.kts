@@ -58,5 +58,8 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:$retrofit2_version")
     implementation("com.squareup.retrofit2:converter-gson:$retrofit2_version")
 
+    val work_version ="2.9.0"
+    implementation("androidx.work:work-runtime-ktx:$work_version")
+
 
 }

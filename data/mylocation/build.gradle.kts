@@ -55,6 +55,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
 
-
+    implementation(project(":core:entity"))
     implementation(project(":core:notification"))
+    implementation(project(":data:planner"))
 }

@@ -24,6 +24,11 @@
     <fragment
         android:id="@+id/fr_camera"
         android:name="com.example.home.camera.CameraFragment"
-        tools:layout="@layout/fragment_camera" />
+        tools:layout="@layout/fragment_camera" >
+        <action
+            android:id="@+id/act_camera_journey"
+            app:destination="@+id/fr_journey"
+            ></action>
+    </fragment>
 
 </navigation>

@@ -13,6 +13,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.inter.explore.databinding.FragmentExploreBinding
+import com.inter.mylocation.BackgroundLocationService
 import com.inter.mylocation.ForegroundLocation
 import com.inter.mylocation.LocationRepository
 import com.inter.notification.MyNotification
@@ -99,8 +100,10 @@ class ExploreFragment : Fragment() {
         })
         binding.btnForeGround.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View?) {
-                val service = Intent(requireActivity(), ForegroundLocation::class.java)
+//                val service = Intent(requireActivity(), ForegroundLocation::class.java)
+                val service = Intent(requireActivity(), BackgroundLocationService::class.java)
                 requireActivity().startService(service)
+                //LocationRepository.startLocationUpdates(requireContext().applicationContext)
 
             }
 
